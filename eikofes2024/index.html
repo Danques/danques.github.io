@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>Danquesの鼠</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polyglot.css">
+    <link rel="stylesheet" href="font-hymmnos.css">
+    <script src="index.js"></script>
+    <script src="observeTranslation.js"></script>
+    <script src="cookie.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <h1 id="我等の名"><span class="t" style="--d:0s;--c:red">Danques</span><span class="t" style="--d:0.35s;--c:blue">の</span><span class="t" style="--d:0.7s;--c:green">鼠</span></h1>
+      <input id="hint" type="checkbox">
+      <div id="main" class="t" style="--d:1.05s;--c:gray">
+        <label id="hint-container" for="hint" style="top:0;right:0"><img id="not-yet-hint" src="unchecked.svg"/><img id="needs-hints" src="checked.svg"/>手助けが必要</label>
+        <div id="polyglot" class="lr" tabindex="0">
+          <div id="langs" class="box">
+            <a href="index-eng.html" title="英語">English</a>
+            <a href="index-deu.html" title="ドイツ語">Deutsch</a>
+            <a href="index-lat.html" title="ラテン語">Lingua Latina</a>
+            <a href="index-hymmnos.html" title="ヒュムノス語" class="font-hymmnos">Hymmnos</a>
+            <a href="index-vol.html" title="ヴォラピュク">Volapük</a>
+          </div>
+          <span class="hint">Other languages&gt;&gt;</span><img src="globe.svg" width="50"/>
+        </div>
+        <noscript>
+          <details><summary>JavaScript</summary>[良くない]</details><details><summary>が</summary>[主格<details><summary>の</summary>[属格の助詞。]</details>助詞。]</details><details><summary>無効</summary>[<details><summary>有効</summary>[<details><summary>無効</summary>[<details><summary>有効</summary>[無効でない<details><summary>こと</summary>[<details><summary>事</summary>[こと]</details>]</details>]</details>でないこと]</details>でないこと]</details>でないこと]</details>ですね。
+          <br>
+          <details>
+            <summary>仕方ないですね…<span class="hint">&lt;&lt;ここをクリック</span></summary>
+            <br>
+            <a href="entrance.html">いりぐち</a>
+          </details>
+        </noscript>
+        <span id="qawsedrftgyhujikolp"></span>
+        <div>
+          <button id="reset" style="display:none;margin:auto" onclick="collapseAll()">何も無かったことにするボタン</button>
+        </div>
+        <p id="p"><span>タップ</span><span>/</span><span>クリック</span><span>する</span><span>と</span><span>、</span><span>単語</span><span>の</span><span>説明</span><span>を</span><span>目睹</span><span>出来</span><span>ます</span><span>。</span></p>
+        <input id="c1" type="checkbox"><label id="m1" for="c1" class="link">サイトマップ</label>
+        <input id="c2" type="checkbox"><span id="m2">サイトマップ<span class="appear">は<label for="c2" class="link">こちら</label></span></span>
+        <input id="c3" type="checkbox"><span id="m3">サイトマップはこちら<span class="appear">ではなく<label for="c3" class="link">こちら</label>では？</span></span>
+        <span id="m4"><span class="appear">残念‼　</span>サイトマップは<a href="sitemap.html">こ<span class="disappear">ちらではなく</span>こ</a><span class="disappear">ちら</span>で<span class="appear">した‼</span><span class="disappear">は？</span></span>
+      </div>
+      <script>
+        const/**/dict={'！':['エクスクラメーション','マーク','。'],'、':['読点','。'],'。':['句点','。'],'/':['スラッシュ','。'],'“':['左','ダブル','クオーテーション','マーク','。'],'”':['右','ダブル','クオーテーション','マーク','。'],'「':['左','鍵括弧','。'],'」':['右','鍵括弧','。'],'Danques':['<a href="entrance.html">いりぐち</a>'],'アクチヸチイ':['活動'],'エクスクラメーション':['感嘆'],'が':['主格','の','格','助詞','。'],'クオーテーション':['引用'],'クリック':['マウス','で','クリック','する','こと','。'],'こと':['もう聞くな'],'しない':['「','する','」','の','逆','。'],'スラッシュ':['“','/','”','。'],'する':['「','しない','」','の','逆','。'],'そ':['それ'],'それ':['そ'],'タップ':['触れる','こと','。'],'ダブル':['二重'],'で':['具格','の','格','助詞','。'],'である':['断定','の','助動詞','。'],'でない':['「','である','」','の','否定','。'],'と':['仮定','の','条件','の','助詞','。'],'とか':['例示','の','助詞','。'],'な':['である','の','言換え','。'],'など':['とか','。'],'なる':['何か','に','変わる','こと','。'],'に':['変化','の','結果','を','表す','格','助詞','。'],'の':['属格','の','格','助詞','。'],'は':['自分に問え'],'へ':['位格','の','格','助詞','。'],'マーク':['符'],'マウス':['鼠','。'],'ます':['丁寧','な','言葉','。'],'もう聞くな':['辞書を引け'],'もの':['形式','名詞','の','一','。'],'より':['比較','の','格','助詞','。'],'を':['目的格','の','格','助詞','。'],'一':['一つ','。'],'一つ':['もう聞くな'],'一人称':['語り手','自身','。'],'一種':['一つ','の','種','。'],'丁寧':['「','粗雑','」','の','逆','。'],'上':['下','の','逆','。'],'下':['上','の','逆','。'],'主格':['「','が','」','で','表す','格','。'],'二つ':['ダブル'],'二重':['二つ','の','重なり','。'],'人':['者'],'付く':['附く'],'付属語':['自立語','の','逆','。'],'代わり':['「','代わる','」','の','名詞','化','。'],'代わる':['代わり','に','なる','こと','。'],'代名詞':['名詞','の','代わり','。'],'仮定':['辞書を引け'],'位格':['「','へ','」','で','表す','格','。'],'何か':['何らか','の','もの','。'],'何らか':['何か','。'],'例示':['「','とか','」','とか','「','など','」','とか','。'],'具格':['「','で','」','で','表す','格','。'],'出来':['辞書を引け'],'助動詞':['活用','する','付属語','。'],'助詞':['活用','しない','付属語','。'],'化':['何か','に','変わる','こと','を','表す','接尾辞','。'],'単語':['一つ','の','言葉','。'],'反対':['「','逆','」','の','言換え','。'],'句点':['「','。','」','。'],'右':['左','の','逆','。'],'名詞':['辞書を引け'],'否定':['「','逆','」','の','類義語','。'],'哺乳類':['鼠','とか','。'],'地下':['地面','の','下'],'地面':['地下','の','上','。'],'変わる':['何か','に','なる','こと','。'],'変化':['変わる','こと','。'],'多い':['「','少ない','」','の','逆','。'],'少ない':['「','多い','」','の','逆','。'],'属格':['「','の','」','で','表す','格','。'],'左':['右','の','逆','。'],'引用':['クオーテーション'],'形式':['辞書を引け'],'感嘆':['エクスクラメーション'],'我':['一人称','の','代名詞','。'],'指示':['示す','こと','。'],'接尾辞':['単語','の','語尾','へ','付く','言葉','。'],'断定':['言い切る','こと','。'],'最初':['最後','の','逆','。'],'最後':['最初','の','逆','。'],'条件':['辞書を引け'],'格':['具格','とか','属格','とか','目的格','とか','。'],'比べる':['比較','する','こと','。'],'比較':['比べる','こと','。'],'活動':['アクチヸチイ'],'活用':['単語','の','語尾','など','が','変化','する','こと','。'],'目で睹ること':['目睹','。'],'目撃':['目で睹ること','。'],'目的格':['「','を','」','で','表す','格','。'],'目睹':['目撃','。'],'示す':['指示','する'],'種':['辞書を引け'],'符':['マーク'],'等':['複数','を','表す','接尾辞','。'],'粗雑':['丁寧','でない','。'],'結果':['辞書を引け'],'者':['人'],'自分に問え':['もう聞くな'],'自立語':['付属語','の','逆','。'],'自身':['そ','の','もの','。'],'表す':['示す'],'複数':['一つ','より','多い','こと','。'],'触る':['触れる','。'],'触れる':['触る','。'],'言い切る':['断定','する','こと','。'],'言換え':['近い','言葉','。'],'言葉':['詞'],'詞':['言葉'],'語り手':['語る','人','。'],'語る':['辞書を引け'],'語尾':['単語','の','最後','。'],'説き明かす':['説明','する','。'],'説明':['説き明かす','こと','。'],'読点':['「','、','」','。'],'辞書を引け':['もう聞くな'],'近い':['「','遠い','」','の','反対','。'],'逆':['順','の','逆','。'],'遠い':['「','近い','」','の','反対','。'],'重なり':['辞書を引け'],'鍵括弧':['“','「','”','とか','“','」','”','とか','。'],'附く':['付く'],'順':['逆','の','逆','。'],'類義語':['「','言換え','」','の','言換え','。'],'鼠':['哺乳類','の','一種','。'],}
+        const/**/我等の名=document.getElementById('我等の名')
+        const/**/desc=document.getElementById('qawsedrftgyhujikolp')
+        const/**/p=document.getElementById('p')
+        const/**/expansive_list=[我等の名,desc,p]
+        insertDescription(desc,['我','等',{s:'<span class="hint" style="font-size:0.8em">クリック&gt;&gt;&gt;</span>'},'Danques',{s:'<span class="hint" style="font-size:0.8em">&lt;&lt;&lt;クリック</span>'},'の','鼠','は','地下','活動','である','！'],true)
+        initChildMorphemes(我等の名)
+        initChildMorphemes(p)
+        observeTranslation({
+          pageLang: 'jpn',
+          langs: ['eng', 'deu', 'lat', 'hymmnos', 'vol'],
+        })
+        insertCookieBanner(document.getElementById('main'))
+      </script>
+    </div>
+  </body>
+</html>

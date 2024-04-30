@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Something funny</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas">O your web browser doesn't seem to support this kind of technology</canvas>
+    <script>
+      const canvas = document.getElementById('canvas');
+
+      (window.onresize = () => {
+        width = canvas.width = window.innerWidth
+        height = canvas.height = window.innerHeight
+      })()
+
+      const ctx = canvas.getContext('2d')
+      let people = []
+
+      const rand_scale = 10
+      const c = 1 << (rand_scale + 1)
+      const rand = () => {
+        const x = Math.floor(Math.random() * c);
+        let r = 0
+        for (let i = 0; i < rand_scale; i++) {
+          r += (x >> i & 2) - 1
+        }
+        return r
+      }
+
+      const frame = t => {
+        const max_people = width * height / 1000
+        const remaining_people = []
+        const newcomers = [...Array(Math.max(0, Math.floor(Math.random() * (max_people - people.length))))].map(_ => ({ x: Math.random() * width, y: Math.random() * height }))
+        for (const person of people) {
+          ctx.fillRect(person.x, person.y, 1, 1)
+          const new_x = person.x += rand(),
+            new_y = person.y += rand()
+          if (new_x < 0 || width <= new_x ||
+            new_y < 0 || height <= new_y) continue
+          remaining_people.push(person)
+        }
+        people = people.concat(newcomers)
+        requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+    </script>
+  </body>
+</html>

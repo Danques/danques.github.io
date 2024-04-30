@@ -1,0 +1,45 @@
+@keyframes link {
+    0% {
+        color: hsl(var(--hue), 100%, 50%);
+    }
+
+    to {
+        color: hsl(var(--hue), 100%, 30%);
+    }
+}
+
+a:link:not(.hidden-link),
+.link {
+    --hue: 240;
+    animation: link 1s infinite;
+    text-decoration: underline;
+    -webkit-user-drag: element;
+}
+
+a:link:not(.hidden-link),
+.link {
+    cursor: pointer;
+}
+
+a:link:not(.hidden-link):active,
+.link:active {
+    --hue: 0;
+}
+
+.hidden-link {
+    color: unset;
+    text-decoration: none;
+    cursor: unset;
+    -webkit-user-drag: none;
+}
+
+a:link::before,
+a:link::after {
+    font-size: 0.7em;
+    vertical-align: middle;
+}
+
+.box {
+    border: #aaa solid 0.5rem;
+    border-radius: 0.5rem;
+}

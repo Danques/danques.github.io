@@ -1,0 +1,23 @@
+#polyglot {
+    position: fixed;
+    bottom: 1rem;
+}
+
+#polyglot.lr {
+    right: 1rem;
+    text-align: right;
+}
+
+#polyglot.rl {
+    left: 1rem;
+    text-align: left;
+}
+
+#langs {
+    display: none;
+    padding: 0.5rem;
+}
+
+#polyglot:focus-within>#langs {
+    display: block;
+}

@@ -1,0 +1,62 @@
+.main {
+    text-align: center;
+}
+
+@keyframes show {
+    0% { opacity: 0; }
+    80% { color: var(--c); }
+    to { opacity: 1; }
+}
+
+.t {
+    opacity: 0;
+    animation: show 100ms 2;
+    animation-fill-mode: forwards;
+    animation-delay: var(--d);
+}
+
+details {
+    display: inline;
+}
+
+summary {
+    display: inline;
+    list-style: none;
+}
+
+#hint-container { position: fixed; font-size: 1.5rem; margin: 1rem; }
+#hint-container>img { width: 1em; }
+.hint,
+#needs-hints,
+#hint:checked+div>#hint-container>#not-yet-hint { display: none; }
+#hint:checked+div>#hint-container>#needs-hints { display: inline; }
+#hint:checked+div .hint { display: unset; }
+
+@keyframes appear {
+  0% { max-width: 0; }
+  to { max-width: 100%; }
+}
+
+@keyframes disappear{
+  0% { max-width: 100%; }
+  to { max-width: 0; }
+}
+
+#hint,
+#c1, #c2, #c3,
+#m2, #m3, #m4 { display: none; }
+#c1:checked~#m2,
+#c2:checked~#m3,
+#c3:checked~#m4 { display: inline-block; }
+#c1:checked+#m1,
+#c2:checked+#m2,
+#c3:checked+#m3 { display: none; }
+.appear,
+.disappear { display: inline-block; height: 1lh; overflow: hidden; vertical-align: bottom; }
+#c1:checked~#m2 .appear,
+#c2:checked~#m3 .appear,
+#c3:checked~#m4 .appear { animation: appear 0.3s linear 0.3s both; }
+#c1:checked~#m2 .disappear,
+#c2:checked~#m3 .disappear,
+#c3:checked~#m4 .disappear { animation: disappear 0.3s linear both; }
+#m1, #m2, #m3, #m4 { white-space-collapse: break-spaces; }

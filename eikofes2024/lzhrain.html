@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="lzh">
+  <head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      writing-mode: vertical-lr;
+    }
+    #rain {
+      margin: 0;
+    }
+    .l1 { color: #8f8; text-shadow: 0 0 2px #0f0, 0 0 2px #0f0, 0 0 2px #0f0; }
+    .l2 { color: #3b3; text-shadow: 0 0 2px #0f0, 0 0 1px #0f0; }
+    </style>
+    <script src="lzhrain.js"></script>
+  </head>
+  <body bgcolor="#000000">
+    <pre id="rain"></pre>
+    <script>
+      const/**/rain_container=document.getElementById("rain")
+      const/**/rain=new/**/LZHRain({
+        element:rain_container,
+        elementWidth:innerWidth,
+        elementHeight:innerHeight,
+      })
+    </script>
+  </body>
+</html>

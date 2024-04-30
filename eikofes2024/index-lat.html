@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="la">
+  <head>
+    <meta charset="UTF-8">
+    <title>Mus Danquis</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polyglot.css">
+    <link rel="stylesheet" href="font-hymmnos.css">
+    <script src="index.js"></script>
+    <script src="observeTranslation.js"></script>
+    <script src="cookie.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <h1 id="NostrumNomen"><span class="t" style="--d:0s;--c:red">Mus</span> <span class="t" style="--d:0.35s;--c:blue">Danquis</span></h1>
+      <input id="hint" type="checkbox">
+      <div id="main" class="t" style="--d:0.70s;--c:gray">
+        <label id="hint-container" for="hint" style="top:0;right:0"><img id="not-yet-hint" src="unchecked.svg"/><img id="needs-hints" src="checked.svg"/>Egesne auxilio?</label>
+        <div id="polyglot" class="lr" tabindex="0">
+          <div id="langs" class="box">
+            <a href="index.html" title="Lingua Iaponica">日本語</a>
+            <a href="index-eng.html" title="Lingua Anglica">English</a>
+            <a href="index-deu.html" title="Lingua Theodisca">Deutsch</a>
+            <a href="index-hymmnos.html" title="Lingua Hymmnos" class="font-hymmnos">Hymmnos</a>
+            <a href="index-vol.html" title="Volapük">Volapük</a>
+          </div>
+          <span class="hint">Other languages&gt;&gt;</span><img src="globe.svg" width="50"/>
+        </div>
+        <noscript>
+          <details><summary>Iavascriptum</summary>[pessime pessimum]</details> <details><summary>est</summary>[primae personae singularis coniugationis "esse"]</details> <details><summary>debile</summary>[non <details><summary>habile</summary>[non <details><summary>debile</summary>[non <details><summary>habile</summary>[<details><summary>non</summary>[verbum negationis]</details> debile]</details>]</details>]</details>]</details> <details><summary>teo</summary>[homo qui situm videt interretialem]</details> <details><summary>in</summary>[praepositio dicendi interius]</details> <details><summary>navigatro</summary>[instrumentum videndi interretis]</details>
+          <br>
+          <details>
+            <summary>Re<span class="hint"> &lt;&lt;Crepita hoc</span></summary>
+            <br>
+            <a href="entrance.html">Vestibulum</a>
+          </details>
+        </noscript>
+        <span id="qawsedrftgyhujikolp"></span>
+        <div>
+          <button id="reset" style="display:none;margin:auto" onclick="collapseAll()">Simulare ut nil evenerit</button>
+        </div>
+        <p id="p"><span>Pulsate</span> <span>verbum</span> <span>visum</span> <span>eius</span> <span>definitionem</span><span>.</span></p>
+        <input id="c1" type="checkbox"><label id="m1" for="c1" class="link">Tabula situs</label>
+        <input id="c2" type="checkbox"><span id="m2"><span class="appear"><label for="c2" class="link">Hic</label> </span><span class="appear">t</span><span class="disappear">T</span>abula situs</span>
+        <input id="c3" type="checkbox"><span id="m3"><span class="appear">Potius <label for="c3" class="link">hic</label> quam </span><span class="appear">h</span><span class="disappear">H</span>ic <span class="appear">est </span>tabula situs</span>
+        <span id="m4"><span class="appear">Erravisti!</span><span class="disappear"> Potius hic quam hic est</span> tabula situs<span class="appear"> est <a href="sitemap-lat.html">hic</a>!</span></span>
+      </div>
+      <script>
+        const/**/s={'s':' '}
+        const/**/dict={'Mus':['Animal',s,'quoddam',s,'parvum'],'Danquis':['<a href="entrance-lat.html">Aditus</a>'],'appellamur':['TODO'],'subterranea':['TODO'],'societas':['TODO'],'!':['TODO'],'visum':['Supinum',s,'verbi',s,'"','videre','"'],'verbi':['Genitivum',s,'verbi',s,'"','verbum','"'],'"':['Signum',s,'citationis'],}
+        const/**/NostrumNomen=document.getElementById('NostrumNomen')
+        const/**/desc=document.getElementById('qawsedrftgyhujikolp')
+        const/**/p=document.getElementById('p')
+        const/**/expansive_list=[NostrumNomen,desc,p]
+        insertDescription(desc,['Mus',s,'Danquis',s,'appellamur',s,'subterranea',s,'societas','!'],true)
+        initChildMorphemes(NostrumNomen)
+        initChildMorphemes(p)
+        observeTranslation({
+          pageLang: 'lat',
+          langs: ['jpn', 'eng', 'deu', 'hymmnos', 'vol'],
+        })
+        insertCookieBanner(document.getElementById('main'))
+      </script>
+    </div>
+  </body>
+</html>

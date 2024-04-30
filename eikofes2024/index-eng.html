@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>The Rat of Danques</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polyglot.css">
+    <link rel="stylesheet" href="font-hymmnos.css">
+    <script src="index.js"></script>
+    <script src="observeTranslation.js"></script>
+    <script src="cookie.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <h1 id="OurName"><span class="t" style="--d:0s;--c:red">The</span> <span class="t" style="--d:0s;--c:red">Rat</span> <span class="t" style="--d:0.35s;--c:blue">of</span> <span class="t" style="--d:0.7s;--c:green">Danques</span></h1>
+      <input id="hint" type="checkbox">
+      <div id="main" class="t" style="--d:1.05s;--c:gray">
+        <label id="hint-container" for="hint" style="top:0;right:0"><img id="not-yet-hint" src="unchecked.svg"/><img id="needs-hints" src="checked.svg"/>Need help?</label>
+        <div id="polyglot" class="lr" tabindex="0">
+          <div id="langs" class="box">
+            <a href="index.html" title="Japanese">日本語</a>
+            <a href="index-deu.html" title="German">Deutsch</a>
+            <a href="index-lat.html" title="Latin">Lingua Latina</a>
+            <a href="index-hymmnos.html" title="Hymmnos" class="font-hymmnos">Hymmnos</a>
+            <a href="index-vol.html" title="Volapük">Volapük</a>
+          </div>
+          <span class="hint">Other languages&gt;&gt;</span><img src="globe.svg" width="50"/>
+        </div>
+        <noscript>
+          <details><summary>JavaScript</summary>[doubleplusungood]</details> <details><summary>is</summary>[third-person singular conjugation of "be"]</details> <details><summary>disabled</summary>[not <details><summary>enabled</summary>[not <details><summary>disabled</summary>[not <details><summary>enabled</summary>[<details><summary>not</summary>[word used for negation]</details> disabled]</details>]</details>]</details>]</details>, <details><summary>isn't it</summary>[tag question]</details><details><summary>?</summary>[question mark]</details>
+          <br>
+          <details>
+            <summary>Okay...<span class="hint"> &lt;&lt;Click here</span></summary>
+            <br>
+            <a href="entrance.html">The Entrance</a>
+          </details>
+        </noscript>
+        <span id="qawsedrftgyhujikolp"></span>
+        <div>
+          <button id="reset" style="display:none;margin:auto" onclick="collapseAll()">Pretend nothing happened</button>
+        </div>
+        <p id="p"><span>Tap</span> <span>or</span> <span>click</span> <span>to</span> <span>view</span> <span>word</span> <span>descriptions</span><span>.</span></p>
+        <input id="c1" type="checkbox"><label id="m1" for="c1" class="link">Sitemap</label>
+        <input id="c2" type="checkbox"><span id="m2"><span class="appear">The </span><span class="appear">s</span><span class="disappear">S</span>itemap<span class="appear"> is <label for="c2" class="link">here</label>.</span></span>
+        <input id="c3" type="checkbox"><span id="m3">The sitemap is here<span class="appear">, rather <label for="c3" class="link">here</label></span>.</span>
+        <span id="m4"><span class="appear">Wrong! </span>The sitemap is <a href="sitemap-eng.html">here</a><span class="disappear">, rather here.</span><span class="appear">!</span></span>
+      </div>
+      <script>
+        const/**/s={'s':' '}
+        const/**/dict={'We':['The',s,'first-person',s,'plural',s,'pronoun','.'],'are':['The',s,'first-person',s,'plural',s,'conjugation',s,'of',s,'"','be','"','.'],'The':['The',s,'definite',s,'article','.'],'Rat':['A',s,'kind',s,'of',s,'animal','.'],'of':['A',s,'preposition',s,'expressing',s,'the',s,'genitive',s,'case','.'],'Danques':['<a href="entrance-eng.html">The Entrance</a>'],',':['Comma','.'],'Comma':['The',s,'punctuation mark',s,'⟨',',','⟩','.'],'a':['The',s,'indefinite',s,'article',s,'before',s,'a',s,'consonant','.'],'an':['The',s,'indefinite',s,'article',s,'before',s,'a',s,'vowel','.'],'underground':['Under',s,'ground','.'],'activity':['TODO'],'!':['The',s,'exclamation mark','.'],'First-person':['TODO'],'plural':['Multiple','.'],'pronoun':['A',s,'kind',s,'of',s,'deictic',s,'word','.'],'.':['Period','.'],'period':['The',s,'punctuation mark',s,'⟨','.','⟩','.'],'kind':['A',s,'synonym',s,'of',s,'"','type','"','.'],'be':['The',s,'lemma',s,'form',s,'of',s,'"','are','"','.'],}
+        const/**/OurName=document.getElementById('OurName')
+        const/**/desc=document.getElementById('qawsedrftgyhujikolp')
+        const/**/p=document.getElementById('p')
+        const/**/expansive_list=[OurName,desc,p]
+        geta = -100
+        insertDescription(desc,['We',s,'are',s,'The',s,'Rat',s,'of',s,'Danques',',',s,'an',s,'underground',s,'activity','!'],true)
+        initChildMorphemes(OurName)
+        initChildMorphemes(p)
+        observeTranslation({
+          pageLang: 'eng',
+          langs: ['jpn', 'deu', 'lat', 'hymmnos', 'vol'],
+        })
+        insertCookieBanner(document.getElementById('main'))
+      </script>
+    </div>
+  </body>
+</html>

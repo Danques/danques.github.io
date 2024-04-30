@@ -1,0 +1,12 @@
+@font-face {
+    font-family: kardinal;
+    src: url(fonts/kardinal.ttf);
+}
+
+.kardinal {
+    font-family: kardinal;
+}
+
+.non-kardinal {
+    font-family: initial;
+}

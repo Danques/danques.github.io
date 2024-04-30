@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <title>Die Ratte von Danques</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polyglot.css">
+    <link rel="stylesheet" href="font-hymmnos.css">
+    <script src="index.js"></script>
+    <script src="observeTranslation.js"></script>
+    <script src="cookie.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <h1 id="UnserName"><span class="t" style="--d:0s;--c:red">Die</span> <span class="t" style="--d:0s;--c:red">Ratte</span> <span class="t" style="--d:0.35s;--c:blue">von</span> <span class="t" style="--d:0.7s;--c:green">Danques</span></h1>
+      <input id="hint" type="checkbox">
+      <div id="main" class="t" style="--d:1.05s;--c:gray">
+        <label id="hint-container" for="hint" style="top:0;right:0"><img id="not-yet-hint" src="unchecked.svg"/><img id="needs-hints" src="checked.svg"/>Brauchen Sie Hilfe?</label>
+        <div id="polyglot" class="lr" tabindex="0">
+          <div id="langs" class="box">
+            <a href="index.html" title="Japanisch">日本語</a>
+            <a href="index-eng.html" title="Englisch">English</a>
+            <a href="index-lat.html" title="Latein">Lingua Latina</a>
+            <a href="index-hymmnos.html" title="Hymmnos Sprache" class="font-hymmnos">Hymmnos</a>
+            <a href="index-vol.html" title="Volapük">Volapük</a>
+          </div>
+          <span class="hint">Other languages&gt;&gt;</span><img src="globe.svg" width="50"/>
+        </div>
+        <noscript>
+          <details><summary>JavaScript</summary>[teuflisch]</details> <details><summary>ist</summary>[]</details> <details><summary>deaktiviert</summary>[]</details>
+          <br>
+          <details>
+            <summary>Okay...<span class="hint"> &lt;&lt;Klicken Sie hier</span></summary>
+            <br>
+            <a href="entrance.html">Der Eingang</a>
+          </details>
+        </noscript>
+        <span id="qawsedrftgzhujikolp"></span>
+        <div>
+          <button id="reset" style="display:none;margin:auto" onclick="collapseAll()">Einbilden, daß nichts eingetreten hat</button>
+        </div>
+        <p id="p"><span>Klicken</span> <span>Sie</span><span>,</span> <span>um</span> <span>die</span> <span>Wortdefinitionen</span> <span>zu</span> <span>zeigen</span><span>.</span></p>
+        <input id="c1" type="checkbox"><label id="m1" for="c1" class="link">Sitemap</label>
+        <input id="c2" type="checkbox"><span id="m2"><span class="appear">The </span><span class="appear">s</span><span class="disappear">S</span>itemap<span class="appear"> is <label for="c2" class="link">here</label>.</span></span>
+        <input id="c3" type="checkbox"><span id="m3">The sitemap is here<span class="appear">, rather <label for="c3" class="link">here</label></span>.</span>
+        <span id="m4"><span class="appear">Wrong! </span>The sitemap is <a href="sitemap-deu.html">here</a><span class="disappear">, rather here.</span><span class="appear">!</span></span>
+      </div>
+      <script>
+        const/**/s={'s':' '}
+        const/**/dict={'Danques':['<a href="entrance-deu.html">The Entrance</a>'],}
+        const/**/UnserName=document.getElementById('UnserName')
+        const/**/desc=document.getElementById('qawsedrftgzhujikolp')
+        const/**/p=document.getElementById('p')
+        const/**/expansive_list=[UnserName,desc,p]
+        insertDescription(desc,['Wir',s,'heißen',s,'die',s,'Ratte',s,'von',s,'Danques',',',s,'eine',s,'Untergrundorganisation','!'],true)
+        initChildMorphemes(UnserName)
+        initChildMorphemes(p)
+        observeTranslation({
+          pageLang: 'deu',
+          langs: ['jpn', 'eng', 'lat', 'hymmnos', 'vol'],
+        })
+        insertCookieBanner(document.getElementById('main'))
+      </script>
+    </div>
+  </body>
+</html>

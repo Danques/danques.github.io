@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="mis-hymmnos">
+  <head>
+    <meta charset="UTF-8">
+    <title>Titilia manaf oz Ar Danques</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polyglot.css">
+    <link rel="stylesheet" href="font-hymmnos.css">
+    <script src="index.js"></script>
+    <script src="observeTranslation.js"></script>
+    <script src="cookie.js"></script>
+  </head>
+  <body>
+    <div class="main hymmnos">
+      <h1 id="MeanManac"><span class="t" style="--d:0s;--c:red">Titilia</span> <span class="t" style="--d:0s;--c:red">manaf</span> <span class="t" style="--d:0.35s;--c:blue">oz</span> <span class="t" style="--d:0.7s;--c:green">Ar</span> <span class="t" style="--d:0.7s;--c:green">Danques</span></h1>
+      <input id="hint" type="checkbox">
+      <div id="main" class="t" style="--d:1.05s;--c:gray">
+        <label id="hint-container" for="hint" style="top:0;right:0"><img id="not-yet-hint" src="unchecked.svg"/><img id="needs-hints" src="checked.svg"/>Yorr jass swant nor na</label>
+        <div id="polyglot" class="non-hymmnos lr" tabindex="0">
+          <div id="langs" class="box">
+            <a href="index.html" title="Japanese">日本語</a>
+            <a href="index-eng.html" title="English">English</a>
+            <a href="index-deu.html" title="German">Deutsch</a>
+            <a href="index-lat.html" title="Latin">Lingua Latina</a>
+            <a href="index-vol.html" title="Volapyk">Volapük</a>
+          </div>
+          <span class="hint">Other languages&gt;&gt;</span><img src="globe.svg" width="50"/>
+        </div>
+        <noscript>
+          <details><summary>Ma</summary>[ween yaserwe]</details> <details><summary>num</summary>[0 firle]</details> <details><summary>wa</summary>[sial quel]</details> <details><summary>firle</summary>[paul]</details> <details><summary>rre</summary>[wart folten whou exec]</details> <details><summary>JavaScript</summary>[Rrha quel ra gott]</details> <details><summary>wis</summary>[wart rinc]</details> <details><summary>nel</summary>[na <details><summary>irs</summary>[na <details><summary>nel</summary>[na <details><summary>irs</summary>[na nel]</details>]</details>]</details>]</details> <details><summary>iem</summary>[her kierre]</details>
+          <br>
+          <details>
+            <summary>Fou num wa<span class="hint"> &lt;&lt;Aulla here</span></summary>
+            <br>
+            <a href="entrance.html">Enter</a>
+          </details>
+        </noscript>
+        <span id="qawsedrftgyhujikolp"></span>
+        <div>
+          <button id="reset" style="display:none;margin:auto" onclick="collapseAll()">Ini omnis</button>
+        </div>
+        <p id="p"><span>Fou</span> <span>touwaka</span> <span>ra</span> <span>yorr</span> <span>aulla</span> <span>yetere</span> <span>vit</span> <span>anw</span> <span>wart</span> <span>sphilar</span></p>
+        <input id="c1" type="checkbox"><span id="m1">Ma num ra <label for="c1" class="link">leaff oz omnis lof</label></span>
+        <input id="c2" type="checkbox"><span id="m2"><span class="disappear">Ma num</span><span class="appear">Fou yea</span> ra leaff oz omnis lof<span class="appear"> ween <label for="c2" class="link">here</label></span></span>
+        <input id="c3" type="checkbox"><span id="m3"><span class="disappear">Fou</span><span class="appear">Wee</span> yea ra leaff oz omnis lof ween <span class="appear">na </span>here<span class="appear"> den <label for="c3" class="link">here</label></span></span>
+        <span id="m4">W<span class="disappear">ee</span><span class="appear">as</span> <span class="disappear">ye</span><span class="appear">wa</span>a ra <span class="appear">messe tes yor rre </span>leaff oz omnis lof<span class="disappear"> ween na</span> <a href="sitemap-hymmnos.html">here</a><span class="disappear"> den here</span></span>
+      </div>
+      <script>
+        const/**/s={'s':' '}
+        const/**/dict={'Fou':['TODO'],'aulla':['TODO'],'sphilar':['TODO'],'titilia':['TODO'],'vit':['firle',s,'lusye',s,'clalliss'],'vonn':['nel',s,'lusye'],'wart':['TODO'],'yetere':['TODO'],'mean':['TODO'],'nel':['0'],'0':['nel'],'claliss':['nille',s,'oz',s,'rudje',s,'burle',s,'grrena',s,'vinan',s,'noglle'],'rudje':['1',s,'claliss'],'burle':['1',s,'claliss'],'grrena':['1',s,'claliss'],'vinan':['1',s,'claliss'],'noglle':['1',s,'claliss'],'Danques':['<a href="entrance-hymmnos.html">Enter</a>'],'oz':['wart',s,'haf'],'haf':['TODO'],}
+        const/**/MeanManac=document.getElementById('MeanManac')
+        const/**/desc=document.getElementById('qawsedrftgyhujikolp')
+        const/**/p=document.getElementById('p')
+        const/**/expansive_list=[MeanManac,desc,p]
+        insertDescription(desc,['Was',s,'yea',s,'ra',s,'mean',s,'vonn',s,'syast',s,'titilia',s,'manaf',s,'oz',s,'Ar',s,'Danques'],true)
+        initChildMorphemes(MeanManac)
+        initChildMorphemes(p)
+        observeTranslation({
+          pageLang: 'hymmnos',
+          langs: ['jpn', 'eng', 'deu', 'lat', 'vol'],
+        })
+        insertCookieBanner(document.getElementById('main'))
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>The Last Judgment Simulator</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      #msg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding: 1rem;
+        color: #4444ff;
+        font-family: Lucida Grande, Verdana, Helvetica, Arial, sans-serif;
+        font-size: 2.5rem;
+        text-align: center;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas">O your web browser doesn't seem to support this kind of technology</canvas>
+    <div id="msg"></div>
+    <script>
+      const canvas = document.getElementById('canvas');
+      const msgContainer = document.getElementById('msg')
+
+      const dblclick_interval = 300
+      let dblclick_timer = null
+      addEventListener('mousedown', e => {
+        if (flags.eternalPeace) return
+        fas_buff = [[e.clientX, e.clientY]]
+        if (flags.doubleClick) {
+          clearTimeout(dblclick_timer)
+          dblclick_timer = null
+        } else {
+          dblclick_timer = setTimeout(() => {
+            fas = fas_buff
+            flags.doubleClick = false
+          }, dblclick_interval)
+          flags.drawing = true
+          flags.doubleClick = true
+        }
+      })
+      addEventListener('mouseup', e => {
+        if (flags.eternalPeace) return
+        const current_fas = flags.doubleClick ? fas_buff : fas
+        if (dblclick_timer === null && flags.doubleClick) {
+          // double click
+          flags.doubleClick = false
+          flags.lastJudgment = true
+        } else {
+          fas_buff.push(fas_buff[0])
+          flags.drawing = false
+          flags.justDrawn = true
+        }
+      })
+      addEventListener('mousemove', e => {
+        if (flags.eternalPeace) return
+        const current_fas = flags.doubleClick ? fas_buff : fas
+        if (flags.drawing)
+          current_fas.push([e.clientX, e.clientY])
+      })
+
+      const msgs = [
+        "Excellent!",
+        "Almighty!",
+        "Omniscient!",
+        "Provident!",
+      ];
+
+      (window.onresize = () => {
+        msgContainer.style.width = `${width = canvas.width = window.innerWidth}px`
+        msgContainer.style.height = `${height = canvas.height = window.innerHeight}px`
+        max_people = width * height / 1000
+      })()
+
+      const flags = {
+        doubleClick: false,
+        drawing: false,
+        justDrawn: false,
+        lastJudgment: false,
+        eternalPeace: false,
+      }
+      let people = []
+      let fas = null, fas_buff = null
+      const msgFadeInOutDuration = 1000
+      let current_msg = { startTime: 0, t: 3600, w: 6000, m: 'A highly abstracted world', loaded: false }
+
+      const rand_scale = 10
+      const c = 1 << (rand_scale + 1)
+      const rand = () => {
+        const x = Math.floor(Math.random() * c);
+        let r = 0
+        for (let i = 0; i < rand_scale; i++) {
+          r += (x >> i & 2) - 1
+        }
+        return r
+      }
+
+      const renderFas = () => {
+        if (fas !== null) {
+          ctx.fillStyle = '#99aaee'
+          ctx.strokeStyle = '#666688'
+          ctx.beginPath()
+          ctx.moveTo(...fas[0])
+          for (let i = 1; i < fas.length; i++) {
+            ctx.lineTo(...fas[i])
+          }
+          ctx.fill()
+          ctx.stroke()
+        }
+      }
+
+      const ctx = canvas.getContext('2d')
+      const frame = t => {
+        const msgAge = t - current_msg.startTime // 蜻蛉的の表示文章
+
+        if (!current_msg.loaded) {
+          msgContainer.innerText = current_msg.m
+          current_msg.loaded = true
+        }
+        if (msgAge < msgFadeInOutDuration)
+          msgContainer.style.opacity = msgAge / msgFadeInOutDuration
+        if ((current_msg.t - msgFadeInOutDuration) < msgAge)
+          msgContainer.style.opacity = (current_msg.t - msgAge) / msgFadeInOutDuration
+        let msg
+        if (flags.justDrawn && !flags.doubleClick) {
+          msg = { t: 3000, w: 6500, m: msgs[Math.floor(Math.random() * msgs.length)] }
+          flags.justDrawn = false
+        } else if (flags.lastJudgment) {
+          if (fas === null)
+            msg = { t: 3600, w: 8500, m: 'Please draw the divine will first' }
+          else {
+            renderFas()
+            const redeemed_people = []
+            for (const person of people) {
+              const redeemed = ctx.isPointInPath(person.x, person.y)
+              if (redeemed)
+                redeemed_people.push(person)
+            }
+            people = redeemed_people
+            msg = { t: Infinity, w: Infinity, m: `Hallelujah!\n${people.length} ${people.length === 1 ? 'person' : 'people'} are redeemed!` }
+            flags.eternalPeace = true
+          }
+          flags.lastJudgment = false
+        } else if (current_msg.startTime + current_msg.w <= t) {
+          if (!flags.drawing) {
+            if (fas !== null)
+              msg = { t: 3600, w: 8500, m: 'Redraw the divine will or double-click to start the Last Judgment' }
+            else
+              msg = { t: 3600, w: 8500, m: 'Draw the divine will' }
+          }
+        }
+        if (msg) {
+          msg.startTime = t
+          msg.loaded = false
+          current_msg = msg
+        }
+        if (flags.eternalPeace) {
+          ctx.fillStyle = '#000000'
+          ctx.fillRect(0, 0, width, height)
+          renderFas()
+          ctx.fillStyle = '#ffffff'
+          for (const person of people) {
+            ctx.fillRect(person.x-1, person.y-1, 2, 2)
+          }
+        } else {
+          ctx.clearRect(0, 0, width, height)
+          // Render the divine will
+          renderFas()
+          // Render people
+          const remaining_people = []
+          const newcomers_number = Math.max(Math.floor(Math.random() * (max_people - people.length) * 0.01), 0)
+          const newcomers = [...Array(newcomers_number)].map(_ => ({ x: Math.floor(Math.random() * width), y: Math.floor(Math.random() * height) }))
+          for (const person of people) {
+            ctx.fillStyle = ctx.isPointInPath(person.x, person.y) ? '#ffffff' : '#000000'
+            ctx.fillRect(person.x-1, person.y-1, 2, 2)
+            const new_x = person.x += rand(),
+              new_y = person.y += rand()
+            if (new_x < 0 || width <= new_x ||
+              new_y < 0 || height <= new_y) continue
+            remaining_people.push(person)
+          }
+          people = remaining_people.concat(newcomers)
+        }
+        requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+    </script>
+  </body>
+</html>

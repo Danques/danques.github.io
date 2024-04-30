@@ -1,0 +1,18 @@
+@font-face {
+    font-family: hymmnos;
+    src: url(fonts/hymmnos.ttf);
+}
+
+.font-hymmnos {
+    font-family: hymmnos;
+}
+
+.hymmnos {
+    font-family: hymmnos;
+    font-size: 2em;
+}
+
+.non-hymmnos {
+    font-family: initial;
+    font-size: initial;
+}

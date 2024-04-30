@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Transition between Luxembourg and Netherlands</title>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <svg>
+    </svg>
+    <script>
+      const
+      canvas=document.getElementById('canvas')
+      const
+      ctx=canvas.getContext("2d")
+      let
+      now
+      const
+      draw=t=>{
+        if(!now)(now=t)
+        delta=t-now
+        now=t
+        requestAnimationFrame(draw)
+      }
+      requestAnimationFrame(draw)
+    </script>
+  </body>
+</html>

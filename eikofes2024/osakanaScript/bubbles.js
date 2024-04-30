@@ -1,0 +1,2 @@
+class Bubbles extends Group {
+}
