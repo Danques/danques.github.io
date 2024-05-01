@@ -14,7 +14,7 @@ const ownFishSize = 20;
 const ownFishHeight = ownFishSize / 2 / Math.sqrt(3);
 
 function preload() {
-    notoSansFont = loadFont("../fonts/NotoSansJP-Thin.ttf");
+    notoSansFont = loadFont("./fonts/NotoSansJP-Thin.ttf");
 }
 
 function setup() {
