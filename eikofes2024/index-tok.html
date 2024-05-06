@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tok">
+  <head>
+    <meta charset="UTF-8">
+    <title>soweli lili Tankesi</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polyglot.css">
+    <link rel="stylesheet" href="font-hymmnos.css">
+    <script src="index.js"></script>
+    <script src="observeTranslation.js"></script>
+    <script src="cookie.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <h1 id="nimi_pi_mi_mute"><span class="t" style="--d:0s;--c:red">soweli</span><span class="t" style="--d:0.35s;--c:blue">lili</span><span class="t" style="--d:0.7s;--c:green">Tankesi</span></h1>
+      <input id="hint" type="checkbox">
+      <div id="main" class="t" style="--d:1.05s;--c:gray">
+        <label id="hint-container" for="hint" style="top:0;right:0"><img id="not-yet-hint" src="unchecked.svg"/><img id="needs-hints" src="checked.svg"/>sina wile ala wile e pona</label>
+        <div id="polyglot" class="lr" tabindex="0">
+          <div id="langs" class="box">
+            <a href="index.html" title="toki Nijon">日本語</a>
+            <a href="index-eng.html" title="toki Inli">English</a>
+            <a href="index-deu.html" title="toki Tosi">Deutsch</a>
+            <a href="index-lat.html" title="toki Lasina">Lingua Latina</a>
+            <a href="index-hymmnos.html" title="toki Inosi" class="font-hymmnos">Hymmnos</a>
+            <a href="index-vol.html" title="toki Wolapi">Volapük</a>
+          </div>
+          <span class="hint">Other languages&gt;&gt;</span><img src="globe.svg" width="50"/>
+        </div>
+        <noscript>
+          <details><summary>tenpo</summary>[lon tawa pi tawa monsi ala]</details> <details><summary>ni</summary>[]</details> <details><summary>sitelen Jawasukuwi</summary>[ike mute]</details> <details><summary>ike</summary>[<details><summary>ala pona</summary>[<details><summary>ala ike</summary>[<details><summary>ala pona</summary>[ala ike]</details>]</details>]</details>]</details>
+          <br>
+          <details>
+            <summary>a...<span class="hint">&lt;&lt;o pilin e ni</span></summary>
+            <br>
+            <a href="entrance.html">tawa insa</a>
+          </details>
+        </noscript>
+        <span id="qawsedrftgyhujikolp"></span>
+        <div>
+          <button id="reset" style="display:none;margin:auto" onclick="collapseAll()">powe e ni: ala li kama</button>
+        </div>
+        <p id="p"><span>o</span> <span>pilin</span> <span>e</span> <span>nimi</span> <span>o</span> <span>lukin</span> <span>e</span> <span>kon</span> <span>nimi</span></p>
+        <input id="c1" type="checkbox"><label id="m1" for="c1" class="link">sitelen lipu</label>
+        <input id="c2" type="checkbox"><span id="m2">sitelen lipu<span class="appear"> li lon e <label for="c2" class="link">ni</label></span></span>
+        <input id="c3" type="checkbox"><span id="m3">sitelen lipu li lon <span class="appear">ala </span>e ni<span class="appear"> taso ken la ona lon e <label for="c3" class="link">ni</label></span></span>
+        <span id="m4"><span class="appear">powe! <a href="sitemap-tok.html">ni</a> li </span>sitelen lipu<span class="disappear"> li lon ala e ni taso ken la ona lon e ni</span><span class="appear">!</span></span>
+      </div>
+      <script>
+        const/**/s={'s':' '}
+        const/**/dict={'Tankesi':['<a href="entrance-tok.html">tawa insa</a>'],'lili':['suli',s,'ala'],'lukin':['pilin',s,'kepeken',s,'oko'],'kulupu':['jan',s,'mute',s,'pona'],'!':['sitelen',s,'tawa',s,'kama',s,'nasa'],'ala':['lon',s,'ala'],'kama':['tawa',s,'e',s,'lon',s,'ni'],'nimi':['toki',s,'wan'],'jan':['kulupu',s,'sina'],'li':['nimi',s,'insa',s,'jan',s,'pali',s,'en',s,'nimi',s,'pali'],}
+        const/**/nimi_pi_mi_mute=document.getElementById('nimi_pi_mi_mute')
+        const/**/desc=document.getElementById('qawsedrftgyhujikolp')
+        const/**/p=document.getElementById('p')
+        const/**/expansive_list=[nimi_pi_mi_mute,desc,p]
+        insertDescription(desc,['mi',s,'mute',s,'li',s,'kulupu',s,'len',s,'li',s,'soweli',s,'lili',s,{s:'<span class="hint" style="font-size:0.8em">クリック&gt;&gt;&gt;</span>'},'Tankesi',{s:'<span class="hint" style="font-size:0.8em">&lt;&lt;&lt;クリック</span>'},'!'],true)
+        initChildMorphemes(nimi_pi_mi_mute)
+        initChildMorphemes(p)
+        observeTranslation({
+          pageLang: 'tok',
+          langs: ['jpn', 'eng', 'deu', 'lat', 'hymmnos', 'vol'],
+        })
+        insertCookieBanner(document.getElementById('main'))
+      </script>
+    </div>
+  </body>
+</html>
