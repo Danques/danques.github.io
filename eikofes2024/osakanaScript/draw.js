@@ -10,6 +10,8 @@ let notoSansFont;
 let lowTextFlag = false;
 let crushedFlag = false;
 
+let EasterLink;
+
 const ownFishSize = 20;
 const ownFishHeight = ownFishSize / 2 / Math.sqrt(3);
 
@@ -63,6 +65,7 @@ function draw() {
         if (height >= 60 && lowTextFlag) {
             crushedFlag = true;
             document.title = '虚無';
+            EasterLink = createA("./osakana-Easter.html", "おさかな文書");
         }
     }
 }
@@ -78,6 +81,8 @@ function drawLeaveText() {
         text(`累計 ${leaveCount} 匹がいなくなりました。`, width / 2, 0);
     } else {
         text(`みんながいなくなりました。`, width / 2, 0);
+        textAlign(CENTER, CENTER);
+        EasterLink.position(width / 2, height / 2);
     }
     pop();
 }
