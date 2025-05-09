@@ -72,6 +72,7 @@ function onAllLoaded() {
     camera.position.set(0, 0, 10);
 
     // background
+    /*
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const hdriLoader = new RGBELoader();
     let envMap;
@@ -83,6 +84,7 @@ function onAllLoaded() {
     }, undefined, function (error) {
         console.log(error)
     });
+    */
 
     // add light
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -94,7 +96,7 @@ function onAllLoaded() {
     // bloom pass
     const bloomParams = {
         threshold: 0,
-        strength: 1.6,
+        strength: 1.2,
         radius: 0,
         exposure: 1
     };
@@ -171,7 +173,7 @@ function onAllLoaded() {
     const layerBadappleWhite = new shaderPlane(new THREE.Vector3(0, 0, -15.5), planeLength, badappleTexture, "layerBadappleWhite");
 
     const videoParticlePlane = new particlePlane(new THREE.Vector3(8, 0, -16), planeLength);
-    const videoVectorScan = new vectorScan(new THREE.Vector3(-8, 0, -16), planeLength, 0.05);
+    const videoVectorScan = new vectorScan(new THREE.Vector3(-8, 0, -16), planeLength, 0.01);
 
     window.addEventListener('blur', onWindowBlur);
     window.addEventListener('resize', onWindowResize);
@@ -546,8 +548,7 @@ function onAllLoaded() {
             const lineMaterial = new THREE.MeshBasicMaterial({
                 color: 0xd94700,
                 side: THREE.DoubleSide,
-                transparent: true,
-                wireframe: true
+                transparent: true
             });
             this.object = new THREE.Mesh(lineGeometry, lineMaterial);
             scene.add(this.object);
