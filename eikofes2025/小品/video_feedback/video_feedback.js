@@ -1,12 +1,17 @@
 let cam;
+let input;
 
 const cam_defwidth = 1280;
 const cam_defheight = 720;
-const dur_time = 150;
+let dur_time = 150;
 let cam_width, cam_height;
 let init;
 let iter_st = 0, iter_lt = 0;
 let sentences = ["You know about me? ", "My name is Danques! ", "I"];
+
+function update_value() {
+    dur_time = input.value();
+}
 
 let notoSans;
 function preload() {
@@ -24,6 +29,10 @@ function setup() {
     textFont(notoSans);
     textSize(500);
     textAlign(CENTER, CENTER);
+    input = createInput();
+    input.size(30);
+    input.position(10, 10);
+    input.input(update_value);
     init = millis();
 }
 
