@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8">
+    <style>
+      html ,body{
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      }
+      #c{
+      width: 100%;
+      height: 300px;
+      /* background-color: #eeeeee; */
+      }
+      #b{
+        margin: 0 auto;
+        padding: 3px;
+        width: fit-content;
+        border: solid 1.5px;
+        border-radius: 12px;
+        cursor: default;
+      }
+      .yo_m{
+        border: #000000;
+        color: #000000;
+      }
+      .no_m{
+        border: #ff0000;
+        color: #ff0000;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>バーコード</h2>
+    <canvas id="c"></canvas>
+    <div id="b" class="no_m">スタート</div>
+    <div>マイクを使用します。ボタンを押してスタート</div>
+    <script>
+      function main() {
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          console.log("getUserMedia supported.");
+          navigator.mediaDevices
+          .getUserMedia(
+            {
+            audio: true,
+            },
+          )
+          .then((stream) => {
+            var b = document.getElementById("b");
+            var c = document.getElementById("c");
+            var ct = c.getContext('2d');
+            var width = c.clientWidth;
+            var height = c.clientHeight;
+            c.width = width;
+            c.height = height;
+            var cw = width/2;
+            var m = Math.ceil(cw/29);
+            var ch = height/2;
+            var rule = [[1,1,3,3,1],[3,1,1,1,3],[1,3,1,1,3],[3,3,1,1,1],[1,1,3,1,3],[3,1,3,1,1],[1,3,3,1,1],[1,1,1,3,3],[3,1,1,3,1],[1,3,1,3,1]];
+
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(stream);
+            const bufferLength = 2048;
+            const rate = audioCtx.sampleRate;
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = bufferLength;
+            var buff_length = String(bufferLength/2).length;
+            source.connect(analyser);
+            const dataArray = new Uint8Array(bufferLength);
+            const dataArray2 = new Uint8Array(bufferLength/2);
+            var starttime;
+            var steptime;
+
+            function update(){
+              if(b.className == "yo_m"){
+                ct.fillStyle = '#ffffff';
+                ct.fillRect(0, 0, width, height);
+                analyser.getByteFrequencyData(dataArray2);
+                var total = dataArray2.reduce((x, y)=>{return x+y});
+                var bunsi = 0;
+                for (let i = 0; i < dataArray2.length; i++) {
+                  bunsi += i*dataArray2[i];
+                }
+
+                console.log(Math.floor(bunsi/Math.max(total,1)));
+                var freq = Math.floor(bunsi/Math.max(total,1));//bunsi/Math.max(total,1);//dataArray2.indexOf(max);
+                var freq_length = String(freq).length;
+                freq = "0".repeat(Math.max(0,buff_length-freq_length))+String(freq);
+                //console.log(freq);
+                analyser.getByteTimeDomainData(dataArray);
+                var dpd = bufferLength*29/width;
+                var changed = [];
+                var n = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                  if (Math.floor(i/dpd)>=n) {
+                    n+=1;
+                    changed.push([String(freq)[n%buff_length]-0,0,0,0,0,0]);
+                  }
+                  changed[changed.length-1][Math.floor((i%dpd)*5/dpd)+1] += dataArray[i]*5*height/(255*dpd*1.5);
+                }
+                draw(changed,0,height-10);
+                }
+              requestAnimationFrame(update);
+            }
+            update();
+
+            b.onclick = ()=>{
+              if(b.className == "no_m"){
+                if(!starttime){
+                  starttime = Date.now();
+                  steptime = starttime;
+                }
+                b.className = "yo_m";
+                b.textContent = "停止"
+              } else{
+                b.className = "no_m";
+                b.textContent = "再開"
+                //console.log(dataArray2);
+              }
+            }
+            function draw(a,ax,ay) {//a = [[data1,length1,...length5],...[]];
+              var x = ax;
+              ct.font = '7pt Arial';
+              ct.fillStyle = '#000000';
+              for (let i = 0; i < a.length; i++) {
+                for (let j = 0; j < 5; j++) {
+                  ct.lineWidth = rule[a[i][0]][j]*2;
+                  ct.beginPath();
+                  ct.moveTo(x, ay);
+                  ct.lineTo(x, ay-a[i][j+1]);
+                  ct.stroke();
+                  x += rule[a[i][0]][j]+4;
+                }
+                ct.fillText(a[i][0], x-19, ay+9);
+              }
+            }
+            window.addEventListener("resize", ()=>{
+              width = c.clientWidth;
+              c.width = width;
+              cw = width/2;
+              m = cw/29;
+              height = c.clientHeight;
+              c.height = height;
+              ch = height/2;
+            });
+          })
+          .catch((err) => {
+            console.error(`The following getUserMedia error occurred: ${err}`);
+            var b = document.getElementById("b");
+            b.onclick = ()=>{
+              main();
+            }
+          });
+        } else {
+          console.log("getUserMedia not supported on your browser!");
+        }
+      }
+      main();
+    </script>
+  </body>
+</html>
