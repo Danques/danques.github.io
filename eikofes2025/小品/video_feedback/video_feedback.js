@@ -44,7 +44,7 @@ function draw() {
     image(cam, 0, 0, cam_width, cam_height);
     if (millis() - init <= dur_time) {
         let tim = millis() / 1000;
-        text(sentences[iter_st][iter_lt],0, 0);
+        text(sentences[iter_st][iter_lt], 0, 0);
     } else {
         init = millis();
         if (iter_lt + 1 >= sentences[iter_st].length) {
