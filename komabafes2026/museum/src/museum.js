@@ -11,7 +11,7 @@ function angleOf(x, z) {
     return Math.atan2(-z, x)
 }
 
-const CELL_SIZE = 2
+const CELL_SIZE = 2.2
 const WALL_HEIGHT = 100
 const EYE_HEIGHT = 1.6
 const ARTWORK_Y = EYE_HEIGHT
@@ -19,9 +19,19 @@ const COLLISION_MARGIN = 0.6
 const PLANE_SIZE = 2.2
 const HOLE_RATIO = 0.1
 const SHAFT_DEPTH = 1.6
-const TEXT_HEIGHT = 2.0;
+const TEXT_HEIGHT = 2.0
+const ARTWORK_WALL_OFFSET = 0.2
 
 const CORRIDOR_N = 9
+
+const PIT_LAP_THRESHOLD = 9
+const PIT_TRIGGER_RADIUS = CELL_SIZE / 2
+const PIT_FALL_GRAVITY = 9
+const PIT_LANDING_DEPTH = 50
+const DARK_PLANE_SIZE = 80
+const WELL_CAP_COLOR = 0x1a1812
+const ROOM_BOTTOM_COLOR = 0x000000
+const ROOM_BOTTOM_HOLE_MARGIN = 0.05
 
 const WALL_COLOR = 0xa8a49b
 const INNER_WALL_COLOR = 0xa8a49b
@@ -125,7 +135,7 @@ function createLightWell(holeSize, shaftDepth, castShadow) {
     const group = new THREE.Group()
     const half = holeSize / 2
 
-    const shaftMaterial = new THREE.MeshStandardMaterial({ color: 0xeae7e0, roughness: 0.95, metalness: 0 })
+    const shaftMaterial = new THREE.MeshStandardMaterial({ color: 0xeae7e0, roughness: 0.95, metalness: 0, side: THREE.DoubleSide })
     const wallGeometry = new THREE.PlaneGeometry(holeSize, shaftDepth)
     const wallDefs = [
         { z: -half, ry: 0 },
@@ -163,7 +173,32 @@ function createLightWell(holeSize, shaftDepth, castShadow) {
     }
     group.add(light)
 
+    const capMaterial = new THREE.MeshBasicMaterial({ color: WELL_CAP_COLOR, side: THREE.DoubleSide })
+    const cap = new THREE.Mesh(new THREE.PlaneGeometry(holeSize, holeSize), capMaterial)
+    cap.rotation.x = -Math.PI / 2
+    cap.position.y = -shaftDepth
+    group.add(cap)
+
+    group.userData.light = light
+    group.userData.lightIntensity = light.intensity
+    group.userData.visualMeshes = group.children.filter((child) => child !== light)
+
     return group
+}
+
+function setWellVisible(well, visible) {
+    if (!well) return
+    const { light, lightIntensity, visualMeshes } = well.userData
+    if (visualMeshes) {
+        visualMeshes.forEach((mesh) => {
+            mesh.visible = visible
+        })
+    } else {
+        well.visible = visible
+    }
+    if (light) {
+        light.intensity = visible ? lightIntensity : 0
+    }
 }
 
 function addTextPlane(group, text, options, desiredHeight, maxWidth, y, z) {
@@ -183,11 +218,11 @@ function addTextPlane(group, text, options, desiredHeight, maxWidth, y, z) {
     return plane
 }
 
-function buildArtwork(scene, x, z, normal) {
+function buildArtwork(scene, x, z, normal, wallOffset) {
     const rotationY = Math.atan2(normal.x, normal.z)
 
     const group = new THREE.Group()
-    group.position.set(x + normal.x * 0.06, 0, z + normal.z * 0.06)
+    group.position.set(x + normal.x * wallOffset, 0, z + normal.z * wallOffset)
     group.rotation.y = rotationY
     scene.add(group)
 
@@ -232,7 +267,8 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         wallColor = WALL_COLOR,
         innerWallColor = INNER_WALL_COLOR,
         ceilingColor = CEILING_COLOR,
-        floorColor = FLOOR_COLOR
+        floorColor = FLOOR_COLOR,
+        artworkWallOffset = ARTWORK_WALL_OFFSET
     } = colors
     const shaderCount = shaders.length
     const sampleColor = createColorSampler(renderer)
@@ -319,6 +355,44 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     const ringCells = buildRingCells(N, CELL_SIZE)
     const half = (N - 1) / 2
 
+    const trapCell = ringCells.find((cell) => cell.isLight && cell.col === half && cell.row === N - 1)
+    const darkPlaneY = -PIT_LANDING_DEPTH
+    const landingY = darkPlaneY + EYE_HEIGHT
+    const darkPlaneMaterial = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 1, metalness: 0 })
+    const darkPlane = new THREE.Mesh(new THREE.PlaneGeometry(DARK_PLANE_SIZE, DARK_PLANE_SIZE), darkPlaneMaterial)
+    darkPlane.rotation.x = -Math.PI / 2
+    darkPlane.position.set(trapCell.x, darkPlaneY, trapCell.z)
+    scene.add(darkPlane)
+
+    const roomBottomHalf = Ro * 1.3
+    const roomBottomShape = new THREE.Shape()
+    roomBottomShape.moveTo(-roomBottomHalf, -roomBottomHalf)
+    roomBottomShape.lineTo(roomBottomHalf, -roomBottomHalf)
+    roomBottomShape.lineTo(roomBottomHalf, roomBottomHalf)
+    roomBottomShape.lineTo(-roomBottomHalf, roomBottomHalf)
+    roomBottomShape.closePath()
+
+    const trapHoleHalf = CELL_SIZE / 2 + ROOM_BOTTOM_HOLE_MARGIN
+    const trapHolePath = new THREE.Path()
+    trapHolePath.moveTo(trapCell.x - trapHoleHalf, trapCell.z - trapHoleHalf)
+    trapHolePath.lineTo(trapCell.x + trapHoleHalf, trapCell.z - trapHoleHalf)
+    trapHolePath.lineTo(trapCell.x + trapHoleHalf, trapCell.z + trapHoleHalf)
+    trapHolePath.lineTo(trapCell.x - trapHoleHalf, trapCell.z + trapHoleHalf)
+    trapHolePath.closePath()
+    roomBottomShape.holes.push(trapHolePath)
+
+    const roomBottomGeometry = new THREE.ShapeGeometry(roomBottomShape)
+    roomBottomGeometry.rotateX(Math.PI / 2)
+    const roomBottomCover = new THREE.Mesh(
+        roomBottomGeometry,
+        new THREE.MeshBasicMaterial({ color: ROOM_BOTTOM_COLOR, side: THREE.DoubleSide })
+    )
+    roomBottomCover.position.y = -SHAFT_DEPTH - ROOM_BOTTOM_HOLE_MARGIN
+    scene.add(roomBottomCover)
+
+    let trapTile = null
+    let trapWell = null
+
     function isArtworkEligible(cell) {
         return cell.isLight && !cell.isCorner && cell.row !== N - 1
     }
@@ -342,7 +416,7 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     const artworks = []
     artworkSlots.forEach(({ cell, baseOrder }) => {
         const { x, z, normal } = outerWallInfo(cell, N, Ro)
-        const artwork = buildArtwork(scene, x, z, normal)
+        const artwork = buildArtwork(scene, x, z, normal, artworkWallOffset)
         artwork.baseOrder = baseOrder
         artwork.currentIndex = null
         artworks.push(artwork)
@@ -368,6 +442,11 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
             const well = createLightWell(holeSize, SHAFT_DEPTH, cell.isCorner)
             well.position.set(cell.x, 0, cell.z)
             scene.add(well)
+
+            if (cell === trapCell) {
+                trapTile = tile
+                trapWell = well
+            }
         } else {
             const tile = createFloorTile(CELL_SIZE, floorColor)
             tile.position.set(cell.x, 0, cell.z)
@@ -403,6 +482,51 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     }
     lapText.draw(lapState.lastDisplay)
 
+    const pitState = {
+        armed: false,
+        triggered: false,
+        falling: false,
+        landed: false,
+        fallVelocity: 0
+    }
+
+    function updatePitArming() {
+        const overThreshold = Math.abs(lapState.lapCount) > PIT_LAP_THRESHOLD
+        if (overThreshold) {
+            if (pitState.armed) return
+            pitState.armed = true
+            if (trapTile) trapTile.visible = false
+            setWellVisible(trapWell, false)
+        } else {
+            if (!pitState.armed || pitState.triggered) return
+            pitState.armed = false
+            if (trapTile) trapTile.visible = true
+            setWellVisible(trapWell, true)
+        }
+    }
+
+    function checkPit(position) {
+        if (!pitState.armed || pitState.triggered) return
+        const dx = position.x - trapCell.x
+        const dz = position.z - trapCell.z
+        if (Math.abs(dx) <= PIT_TRIGGER_RADIUS && Math.abs(dz) <= PIT_TRIGGER_RADIUS) {
+            pitState.triggered = true
+            pitState.falling = true
+        }
+    }
+
+    function updateFall(dt, position) {
+        if (!pitState.falling) return
+        pitState.fallVelocity += PIT_FALL_GRAVITY * dt
+        position.y -= pitState.fallVelocity * dt
+        if (position.y <= landingY) {
+            position.y = landingY
+            pitState.falling = false
+            pitState.landed = true
+            pitState.fallVelocity = 0
+        }
+    }
+
     function reportPosition(x, z) {
         const angle = angleOf(x, z)
         let delta = angle - lapState.lastAngle
@@ -431,6 +555,8 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
                 messageText.draw(message)
             }
         }
+
+        updatePitArming()
     }
 
     return {
@@ -438,6 +564,10 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         spawnYaw: 0,
         clampPosition,
         reportPosition,
+        checkPit,
+        updateFall,
+        isFalling: () => pitState.falling,
+        hasLanded: () => pitState.landed,
         getDebug: () => ({
             unwrapped: lapState.unwrapped,
             artworkShift: lapState.artworkShift,

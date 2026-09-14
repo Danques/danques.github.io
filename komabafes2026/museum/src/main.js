@@ -10,7 +10,8 @@ const MUSEUM_COLORS = {
     wallColor: 0xa8a49b,
     innerWallColor: 0x9d998f,
     ceilingColor: 0xa8a49b,
-    floorColor: 0x8f8b81
+    floorColor: 0x8f8b81,
+    artworkWallOffset: 0.2
 }
 
 const canvas = document.getElementById('scene')
@@ -61,7 +62,7 @@ function updateMovement(dt) {
 
         player.position.addScaledVector(forward, y * MOVE_SPEED * dt)
         player.position.addScaledVector(right, x * MOVE_SPEED * dt)
-        museum.clampPosition(player.position)
+        if (!museum.hasLanded()) museum.clampPosition(player.position)
     }
 }
 
@@ -72,10 +73,17 @@ function animate() {
     camera.rotation.y = player.yaw
     camera.rotation.x = player.pitch
 
-    updateMovement(dt)
+    if (museum.isFalling()) {
+        museum.updateFall(dt, player.position)
+    } else {
+        updateMovement(dt)
+        if (!museum.hasLanded()) {
+            museum.reportPosition(player.position.x, player.position.z)
+            museum.checkPit(player.position)
+        }
+    }
     camera.position.copy(player.position)
 
-    museum.reportPosition(player.position.x, player.position.z)
     museum.updateTime(clock.getElapsedTime(), dt)
     renderer.render(scene, camera)
 }
