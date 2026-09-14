@@ -12,15 +12,21 @@ function angleOf(x, z) {
 }
 
 const CELL_SIZE = 2
-const WALL_HEIGHT = 6
+const WALL_HEIGHT = 100
 const EYE_HEIGHT = 1.6
 const ARTWORK_Y = EYE_HEIGHT
 const COLLISION_MARGIN = 0.6
 const PLANE_SIZE = 2.2
-const HOLE_RATIO = 0.05
+const HOLE_RATIO = 0.1
 const SHAFT_DEPTH = 1.6
+const TEXT_HEIGHT = 2.0;
 
 const CORRIDOR_N = 9
+
+const WALL_COLOR = 0xa8a49b
+const INNER_WALL_COLOR = 0xa8a49b
+const CEILING_COLOR = 0x000000
+const FLOOR_COLOR = 0xa8a49b
 
 function buildRingCells(N, cellSize) {
     const half = (N - 1) / 2
@@ -38,11 +44,12 @@ function buildRingCells(N, cellSize) {
     })
 }
 
-function buildOuterShell(Ro, wallHeight, color) {
+function buildOuterShell(Ro, wallHeight, wallColor, ceilingColor) {
     const group = new THREE.Group()
-    const material = new THREE.MeshStandardMaterial({ color, roughness: 0.92, metalness: 0 })
+    const wallMaterial = new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.92, metalness: 0 })
+    const ceilingMaterial = new THREE.MeshStandardMaterial({ color: ceilingColor, roughness: 0.92, metalness: 0 })
 
-    const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(Ro * 2, Ro * 2), material)
+    const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(Ro * 2, Ro * 2), ceilingMaterial)
     ceiling.rotation.x = Math.PI / 2
     ceiling.position.y = wallHeight
     ceiling.receiveShadow = true
@@ -56,7 +63,7 @@ function buildOuterShell(Ro, wallHeight, color) {
         { x: -Ro, ry: Math.PI / 2 }
     ]
     wallDefs.forEach(({ x = 0, z = 0, ry }) => {
-        const wall = new THREE.Mesh(wallGeometry, material)
+        const wall = new THREE.Mesh(wallGeometry, wallMaterial)
         wall.position.set(x, wallHeight / 2, z)
         wall.rotation.y = ry
         wall.receiveShadow = true
@@ -73,16 +80,16 @@ function outerWallInfo(cell, N, Ro) {
     return { x: Ro, z: cell.z, normal: new THREE.Vector3(-1, 0, 0) }
 }
 
-function createFloorTile(cellSize) {
+function createFloorTile(cellSize, floorColor) {
     const geometry = new THREE.PlaneGeometry(cellSize, cellSize)
     geometry.rotateX(-Math.PI / 2)
-    const material = new THREE.MeshStandardMaterial({ color: 0x8f8b81, roughness: 0.85, metalness: 0.02 })
+    const material = new THREE.MeshStandardMaterial({ color: floorColor, roughness: 0.85, metalness: 0.02 })
     const mesh = new THREE.Mesh(geometry, material)
     mesh.receiveShadow = true
     return mesh
 }
 
-function createLightFloorTile(cellSize, holeSize) {
+function createLightFloorTile(cellSize, holeSize, floorColor) {
     const half = cellSize / 2
     const holeHalf = holeSize / 2
 
@@ -104,7 +111,7 @@ function createLightFloorTile(cellSize, holeSize) {
     const geometry = new THREE.ShapeGeometry(shape)
     geometry.rotateX(-Math.PI / 2)
     const material = new THREE.MeshStandardMaterial({
-        color: 0x8f8b81,
+        color: floorColor,
         roughness: 0.85,
         metalness: 0.02,
         side: THREE.DoubleSide
@@ -135,8 +142,8 @@ function createLightWell(holeSize, shaftDepth, castShadow) {
     })
 
     const glowMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        emissive: 0xffffff,
+        color: 0xffffe0,
+        emissive: 0xffffe0,
         emissiveIntensity: 3.5,
         roughness: 0.6
     })
@@ -145,7 +152,7 @@ function createLightWell(holeSize, shaftDepth, castShadow) {
     glow.position.y = -shaftDepth + 0.02
     group.add(glow)
 
-    const light = new THREE.PointLight(0xffffff, 16, 16, 2)
+    const light = new THREE.PointLight(0xffffe0, 16, 16, 2)
     light.position.y = -shaftDepth * 0.5
     light.castShadow = castShadow
     if (castShadow) {
@@ -220,7 +227,13 @@ function buildArtwork(scene, x, z, normal) {
     return { material, setShader, glow }
 }
 
-export function buildMuseum(scene, shaders, renderer) {
+export function buildMuseum(scene, shaders, renderer, colors = {}) {
+    const {
+        wallColor = WALL_COLOR,
+        innerWallColor = INNER_WALL_COLOR,
+        ceilingColor = CEILING_COLOR,
+        floorColor = FLOOR_COLOR
+    } = colors
     const shaderCount = shaders.length
     const sampleColor = createColorSampler(renderer)
     const sampledColor = new THREE.Color()
@@ -235,21 +248,25 @@ export function buildMuseum(scene, shaders, renderer) {
 
     scene.fog = new THREE.Fog(0x14151a, Ro * 0.55, Ro * 2.6)
 
-    scene.add(buildOuterShell(Ro, WALL_HEIGHT, 0xa8a49b))
+    scene.add(buildOuterShell(Ro, WALL_HEIGHT, wallColor, ceilingColor))
 
     const innerCore = new THREE.Mesh(
         new THREE.BoxGeometry(Ri * 2, WALL_HEIGHT, Ri * 2),
-        new THREE.MeshStandardMaterial({ color: 0x9d998f, roughness: 0.92, metalness: 0 })
+        new THREE.MeshStandardMaterial({ color: innerWallColor, roughness: 0.92, metalness: 0 })
     )
     innerCore.position.y = WALL_HEIGHT / 2
     innerCore.castShadow = true
     innerCore.receiveShadow = true
     scene.add(innerCore)
 
-    scene.add(new THREE.HemisphereLight(0xc9d2e0, 0x201e1a, 0.01))
-    scene.add(new THREE.AmbientLight(0xffffff, 0.01))
+    scene.add(new THREE.HemisphereLight(0xc9d2e0, 0x201e1a, 1.0))
+    scene.add(new THREE.AmbientLight(0xffffe0, 1.0))
 
-    const titleHeight = WALL_HEIGHT * 0.35
+    const floorFillLight = new THREE.DirectionalLight(0xffffe0, 0.5)
+    floorFillLight.position.set(0, WALL_HEIGHT * 3, 0)
+    floorFillLight.target.position.set(0, 0, 0)
+    scene.add(floorFillLight)
+
     const titleGroup = new THREE.Group()
     addTextPlane(
         titleGroup,
@@ -257,7 +274,7 @@ export function buildMuseum(scene, shaders, renderer) {
         { fontSize: 140, color: '#111111', background: 'rgba(255,255,255,0)' },
         1.3,
         Ri * 1.5,
-        titleHeight,
+        TEXT_HEIGHT,
         0.03
     )
     const lapText = createDynamicTextTexture({
@@ -271,18 +288,15 @@ export function buildMuseum(scene, shaders, renderer) {
         new THREE.PlaneGeometry(1.6, 0.5),
         new THREE.MeshBasicMaterial({ map: lapText.texture, transparent: true })
     )
-    lapPlane.position.set(0, titleHeight - 0.85, 0.03)
+    lapPlane.position.set(0, TEXT_HEIGHT - 0.85, 0.03)
     titleGroup.add(lapPlane)
     titleGroup.position.set(0, 0, Ri)
     scene.add(titleGroup)
 
     const LAP_MESSAGES = {
-        '-3': 'c',
-        '-2': 'b',
-        '-1': 'a',
-        1: 'a',
-        2: 'b',
-        3: 'c'
+        '-5': 'そろそろ飽きましたか？',
+        1: 'Hello',
+        5: 'そろそろ飽きましたか？',
     }
     const messageText = createDynamicTextTexture({
         fontSize: 64,
@@ -296,7 +310,7 @@ export function buildMuseum(scene, shaders, renderer) {
         new THREE.PlaneGeometry(4, 4 / messageText.aspect),
         new THREE.MeshBasicMaterial({ map: messageText.texture, transparent: true })
     )
-    messagePlane.position.set(0, titleHeight, 0.03)
+    messagePlane.position.set(0, TEXT_HEIGHT, 0.03)
     messageGroup.add(messagePlane)
     messageGroup.position.set(0, 0, Ro)
     messageGroup.rotation.y = Math.PI
@@ -347,7 +361,7 @@ export function buildMuseum(scene, shaders, renderer) {
 
     ringCells.forEach((cell) => {
         if (cell.isLight) {
-            const tile = createLightFloorTile(CELL_SIZE, holeSize)
+            const tile = createLightFloorTile(CELL_SIZE, holeSize, floorColor)
             tile.position.set(cell.x, 0, cell.z)
             scene.add(tile)
 
@@ -355,7 +369,7 @@ export function buildMuseum(scene, shaders, renderer) {
             well.position.set(cell.x, 0, cell.z)
             scene.add(well)
         } else {
-            const tile = createFloorTile(CELL_SIZE)
+            const tile = createFloorTile(CELL_SIZE, floorColor)
             tile.position.set(cell.x, 0, cell.z)
             scene.add(tile)
         }

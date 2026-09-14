@@ -6,6 +6,13 @@ import { createTouchControls } from './touchControls.js'
 
 const MOVE_SPEED = 4.2
 
+const MUSEUM_COLORS = {
+    wallColor: 0xa8a49b,
+    innerWallColor: 0x9d998f,
+    ceilingColor: 0xa8a49b,
+    floorColor: 0x8f8b81
+}
+
 const canvas = document.getElementById('scene')
 const overlay = document.getElementById('overlay')
 const overlayMessage = document.getElementById('overlay-message')
@@ -85,7 +92,7 @@ overlay.addEventListener('click', () => {
 
 async function init() {
     const shaders = await loadFragmentShaders()
-    museum = buildMuseum(scene, shaders, renderer)
+    museum = buildMuseum(scene, shaders, renderer, MUSEUM_COLORS)
 
     player.position.copy(museum.spawnPosition)
     player.yaw = museum.spawnYaw
