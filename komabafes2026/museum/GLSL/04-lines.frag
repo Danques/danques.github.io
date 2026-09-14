@@ -66,7 +66,7 @@ float distfunc(vec2 p){
     vec2 icoPts[12];
     getIcosahedronPoints(icoPts);
 
-    for(int i = 0; i < 4000; ++i){
+    for(int i = 0; i < 2000; ++i){
         float a = random(vec2(i - 1, i)) * 2. - 1.;
         float b = random(vec2(i, i + 1)) * 2. - 1.;
         float c = random(vec2(i + 1, i + 2)) * 2. - 1.;

@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { createArtworkMaterial } from './shaders.js'
 import { createTextTexture, createDynamicTextTexture } from './textPanel.js'
+import { createArtworkGlow, createColorSampler } from './glow.js'
 
 function mod(n, m) {
     return ((n % m) + m) % m
@@ -191,6 +192,11 @@ function buildArtwork(scene, x, z, normal) {
     plane.position.set(0, ARTWORK_Y, 0)
     group.add(plane)
 
+    const glowGroup = new THREE.Group()
+    glowGroup.position.set(0, ARTWORK_Y, 0)
+    group.add(glowGroup)
+    const glow = createArtworkGlow(glowGroup, PLANE_SIZE)
+
     const labelText = createDynamicTextTexture({
         fontSize: 48,
         color: '#111111',
@@ -211,11 +217,14 @@ function buildArtwork(scene, x, z, normal) {
         labelText.draw(shader.name.replace(/\.frag$/i, '').replace(/[-_]/g, ' '))
     }
 
-    return { material, setShader }
+    return { material, setShader, glow }
 }
 
-export function buildMuseum(scene, shaders) {
+export function buildMuseum(scene, shaders, renderer) {
     const shaderCount = shaders.length
+    const sampleColor = createColorSampler(renderer)
+    const sampledColor = new THREE.Color()
+    let sampleCursor = 0
     const N = CORRIDOR_N
     const Ro = (N * CELL_SIZE) / 2
     const Ri = ((N - 2) * CELL_SIZE) / 2
@@ -237,10 +246,10 @@ export function buildMuseum(scene, shaders) {
     innerCore.receiveShadow = true
     scene.add(innerCore)
 
-    scene.add(new THREE.HemisphereLight(0xc9d2e0, 0x201e1a, 0.42))
-    scene.add(new THREE.AmbientLight(0xffffff, 0.13))
+    scene.add(new THREE.HemisphereLight(0xc9d2e0, 0x201e1a, 0.01))
+    scene.add(new THREE.AmbientLight(0xffffff, 0.01))
 
-    const title_height = WALL_HEIGHT * 0.35
+    const titleHeight = WALL_HEIGHT * 0.35
     const titleGroup = new THREE.Group()
     addTextPlane(
         titleGroup,
@@ -248,7 +257,7 @@ export function buildMuseum(scene, shaders) {
         { fontSize: 140, color: '#111111', background: 'rgba(255,255,255,0)' },
         1.3,
         Ri * 1.5,
-        title_height,
+        titleHeight,
         0.03
     )
     const lapText = createDynamicTextTexture({
@@ -262,7 +271,7 @@ export function buildMuseum(scene, shaders) {
         new THREE.PlaneGeometry(1.6, 0.5),
         new THREE.MeshBasicMaterial({ map: lapText.texture, transparent: true })
     )
-    lapPlane.position.set(0, title_height - 0.85, 0.03)
+    lapPlane.position.set(0, titleHeight - 0.85, 0.03)
     titleGroup.add(lapPlane)
     titleGroup.position.set(0, 0, Ri)
     scene.add(titleGroup)
@@ -287,7 +296,7 @@ export function buildMuseum(scene, shaders) {
         new THREE.PlaneGeometry(4, 4 / messageText.aspect),
         new THREE.MeshBasicMaterial({ map: messageText.texture, transparent: true })
     )
-    messagePlane.position.set(0, title_height, 0.03)
+    messagePlane.position.set(0, titleHeight, 0.03)
     messageGroup.add(messagePlane)
     messageGroup.position.set(0, 0, Ro)
     messageGroup.rotation.y = Math.PI
@@ -422,9 +431,20 @@ export function buildMuseum(scene, shaders) {
             lastDisplay: lapState.lastDisplay,
             slots: artworks.map((a) => ({ baseOrder: a.baseOrder, currentIndex: a.currentIndex }))
         }),
-        updateTime(elapsed) {
+        updateTime(elapsed, dt) {
             artworks.forEach((artwork) => {
                 artwork.material.uniforms.u_time.value = elapsed
+            })
+
+            if (artworks.length > 0) {
+                sampleCursor = (sampleCursor + 1) % artworks.length
+                const artwork = artworks[sampleCursor]
+                sampleColor(artwork.material, sampledColor)
+                artwork.glow.applyColor(sampledColor)
+            }
+
+            artworks.forEach((artwork) => {
+                artwork.glow.update(dt)
             })
         }
     }

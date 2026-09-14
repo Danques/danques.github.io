@@ -30,7 +30,7 @@ scene.background = new THREE.Color(0x14151a)
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 200)
 camera.rotation.order = 'YXZ'
 
-const timer = new THREE.Timer()
+const clock = new THREE.Clock()
 const player = { position: new THREE.Vector3(), yaw: 0, pitch: 0 }
 
 const desktopControls = createDesktopControls(canvas, player)
@@ -60,8 +60,7 @@ function updateMovement(dt) {
 
 function animate() {
     requestAnimationFrame(animate)
-    timer.update()
-    const dt = Math.min(timer.getDelta(), 0.1)
+    const dt = Math.min(clock.getDelta(), 0.1)
 
     camera.rotation.y = player.yaw
     camera.rotation.x = player.pitch
@@ -70,7 +69,7 @@ function animate() {
     camera.position.copy(player.position)
 
     museum.reportPosition(player.position.x, player.position.z)
-    museum.updateTime(timer.elapsedTime)
+    museum.updateTime(clock.getElapsedTime(), dt)
     renderer.render(scene, camera)
 }
 
@@ -86,7 +85,7 @@ overlay.addEventListener('click', () => {
 
 async function init() {
     const shaders = await loadFragmentShaders()
-    museum = buildMuseum(scene, shaders)
+    museum = buildMuseum(scene, shaders, renderer)
 
     player.position.copy(museum.spawnPosition)
     player.yaw = museum.spawnYaw
