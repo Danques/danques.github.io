@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Danques的空間</title>
+  <link rel="stylesheet" href="./src/style.css" />
+  <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="crosshair"></div>
+
+  <div id="joystick-base">
+    <div id="joystick-knob"></div>
+  </div>
+
+  <div id="overlay">
+    <div id="overlay-box">
+      <h1>Danques的空間</h1>
+      <p id="overlay-desc-desktop">WASD or 矢印キーで移動、マウスで視点を操作</p>
+      <p id="overlay-desc-touch">画面左側をドラッグで移動、画面右側をドラッグで視点を操作</p>
+      <p id="overlay-message"></p>
+      <p id="overlay-start">はじめる</p>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
