@@ -55,6 +55,7 @@ const WALL_COLOR = 0xa8a49b
 const INNER_WALL_COLOR = 0xa8a49b
 const CEILING_COLOR = 0x000000
 const FLOOR_COLOR = 0xa8a49b
+const AMBIENT_LIGHT_COLOR = 0xffffff
 
 const LAP_MESSAGES = {
     '-5': '',
@@ -189,7 +190,7 @@ function createLightWell(holeSize, shaftDepth) {
     glow.position.y = -shaftDepth + 0.02
     group.add(glow)
 
-    const light = new THREE.PointLight(0xffffe0, 16, 16, 2)
+    const light = new THREE.PointLight(0xffffff, 16, 16, 2)
     light.position.y = -shaftDepth * 0.5
     group.add(light)
 
@@ -278,7 +279,7 @@ function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCac
     group.add(plaquePlane)
 
 
-    const plaqueLight = new THREE.SpotLight(0xfff2d9, 6, 1.8, Math.PI / 3.2, 0.5, 1.5)
+    const plaqueLight = new THREE.SpotLight(0xfff2d9, 6, 1.0, Math.PI / 3., 0.5, 1.5)
     const plaqueLightTarget = new THREE.Object3D()
     plaquePlane.add(plaqueLight)
     plaquePlane.add(plaqueLightTarget)
@@ -358,10 +359,10 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     innerCore.receiveShadow = true
     scene.add(innerCore)
 
-    scene.add(new THREE.HemisphereLight(0xc9d2e0, 0x201e1a, 1.0))
-    scene.add(new THREE.AmbientLight(0xffffe0, 1.0))
+    // scene.add(new THREE.HemisphereLight(0xc9d2e0, 0x201e1a, 1.0))
+    scene.add(new THREE.AmbientLight(AMBIENT_LIGHT_COLOR, 1.0))
 
-    const floorFillLight = new THREE.DirectionalLight(0xffffe0, 0.5)
+    const floorFillLight = new THREE.DirectionalLight(AMBIENT_LIGHT_COLOR, 0.5)
     floorFillLight.position.set(0, WALL_HEIGHT * 3, 0)
     floorFillLight.target.position.set(0, 0, 0)
     scene.add(floorFillLight)
