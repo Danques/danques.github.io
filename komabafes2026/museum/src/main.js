@@ -20,7 +20,7 @@ const overlayMessage = document.getElementById('overlay-message')
 const joystickBase = document.getElementById('joystick-base')
 const joystickKnob = document.getElementById('joystick-knob')
 
-const isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches && window.matchMedia('(hover: none)').matches
 if (isTouchDevice) document.body.classList.add('touch-device')
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
