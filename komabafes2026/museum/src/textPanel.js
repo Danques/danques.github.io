@@ -73,11 +73,6 @@ function computeNormalMap(heightData, width, height, strength) {
 const PLAQUE_FLAT_GRAY = 0x80 / 255
 const PLAQUE_CARVE_GRAY = 0x1a / 255
 
-// Builds a diffuse+alpha map, a real normal map, and a real displacement
-// map, all derived from the same carved height field, so the text is
-// actually pushed into the plaque's geometry (not just shaded to look like
-// it is) and reads as carved from any angle, including at grazing view
-// angles where a normal map alone shows no silhouette.
 export function createPlaqueMaps(options = {}) {
     const {
         width = 640,
@@ -116,12 +111,9 @@ export function createPlaqueMaps(options = {}) {
     const colorTexture = new THREE.CanvasTexture(colorCanvas)
     colorTexture.colorSpace = THREE.SRGBColorSpace
     const normalTexture = new THREE.CanvasTexture(normalCanvas)
-    // Displacement reads the map's red channel as a plain 0-1 height value,
-    // so this must stay linear/uncolor-managed like the normal map.
+
     const heightTexture = new THREE.CanvasTexture(heightCanvas)
 
-    // displacement = sample*scale + bias; solved so the flat background
-    // (mid-gray) lands at 0 offset and the deepest ink lands at -carveDepth.
     const displacementScale = carveDepth / (PLAQUE_FLAT_GRAY - PLAQUE_CARVE_GRAY)
     const displacementBias = -PLAQUE_FLAT_GRAY * displacementScale
 

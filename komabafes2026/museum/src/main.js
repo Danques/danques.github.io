@@ -112,14 +112,6 @@ overlayStart.addEventListener('click', () => {
     footstepAudio.unlock()
 })
 
-// Canvas text is drawn synchronously with ctx.fillText: if a webfont
-// declared in index.html hasn't finished downloading yet at that moment,
-// the browser silently substitutes a fallback font for that draw and never
-// redraws once the real font arrives, unlike ordinary DOM text. That race
-// is what made description plaques inconsistent - some baked in the wrong
-// font, some got the right one, depending on load timing. Forcing the
-// exact families/weights/characters used by the plaques to finish loading
-// first makes every plaque render with the same font.
 async function loadPlaqueFonts() {
     if (!document.fonts) return
     const sampleText = `Danques的空間 ${getAllDescriptionText()}`
@@ -130,8 +122,7 @@ async function loadPlaqueFonts() {
             document.fonts.ready
         ])
     } catch {
-        // Offline/blocked font request - proceed with whatever's available
-        // rather than leaving the museum stuck on a blank screen forever.
+
     }
 }
 

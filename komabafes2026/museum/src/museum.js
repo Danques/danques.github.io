@@ -479,21 +479,16 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     }
     const slotCount = artworkSlots.length
 
-    // Precompute each distinct shader's material and plaque textures once.
-    // Artworks then just swap references when their assigned shader changes
-    // on a lap, instead of redrawing the plaque canvas and recompiling the
-    // shader every time (which used to cause a stutter each time you passed
-    // the title, since that's where a lap completes and shifts land).
     const shaderCache = shaderCount > 0
         ? shaders.map((shader) => {
-              const material = createArtworkMaterial(shader.source, new THREE.Vector2(1024, 1024))
-              const maps = createPlaqueMaps({ carveDepth })
-              applyAnisotropy(maps.colorTexture, renderer)
-              applyAnisotropy(maps.normalTexture, renderer)
-              const title = shader.name.replace(/\.frag$/i, '').replace(/[-_]/g, ' ')
-              maps.draw(title, getShaderDescription(shader.name))
-              return { material, maps }
-          })
+            const material = createArtworkMaterial(shader.source, new THREE.Vector2(1024, 1024))
+            const maps = createPlaqueMaps({ carveDepth })
+            applyAnisotropy(maps.colorTexture, renderer)
+            applyAnisotropy(maps.normalTexture, renderer)
+            const title = shader.name.replace(/\.frag$/i, '').replace(/[-_]/g, ' ')
+            maps.draw(title, getShaderDescription(shader.name))
+            return { material, maps }
+        })
         : []
 
     const artworks = []
