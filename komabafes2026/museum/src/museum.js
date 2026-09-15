@@ -26,8 +26,19 @@ const PLAQUE_WIDTH = 1.2
 const PLAQUE_HEIGHT = 0.85
 const PLAQUE_MARGIN = 0.15
 const PLAQUE_OFFSET_X = PLANE_SIZE / 2 + PLAQUE_WIDTH / 2 + PLAQUE_MARGIN
-const PLAQUE_LIGHT_OFFSET_X = 0.12
 const DEFAULT_PLAQUE_SEGMENTS = 240
+
+const SPOT_REACH = 0.7
+const SPOT_Z_OFFSET = 0.45
+const DEFAULT_SPOT_TILT_DEG = 45
+
+function computeSpotOffset(tiltDeg) {
+    const tiltRad = THREE.MathUtils.degToRad(tiltDeg)
+    return {
+        x: SPOT_REACH * Math.sin(tiltRad),
+        y: SPOT_REACH * Math.cos(tiltRad)
+    }
+}
 
 const CORRIDOR_N = 9
 
@@ -147,7 +158,7 @@ function createLightFloorTile(cellSize, holeSize, floorColor) {
     return mesh
 }
 
-function createLightWell(holeSize, shaftDepth, castShadow) {
+function createLightWell(holeSize, shaftDepth) {
     const group = new THREE.Group()
     const half = holeSize / 2
 
@@ -180,13 +191,6 @@ function createLightWell(holeSize, shaftDepth, castShadow) {
 
     const light = new THREE.PointLight(0xffffe0, 16, 16, 2)
     light.position.y = -shaftDepth * 0.5
-    light.castShadow = castShadow
-    if (castShadow) {
-        light.shadow.mapSize.set(256, 256)
-        light.shadow.camera.near = 0.2
-        light.shadow.camera.far = 13
-        light.shadow.bias = -0.003
-    }
     group.add(light)
 
     const capMaterial = new THREE.MeshBasicMaterial({ color: WELL_CAP_COLOR, side: THREE.DoubleSide })
@@ -235,7 +239,7 @@ function addTextPlane(group, text, options, desiredHeight, maxWidth, y, z, rende
     return plane
 }
 
-function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCache) {
+function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCache, spotTiltDeg) {
     const rotationY = Math.atan2(normal.x, normal.z)
 
     const group = new THREE.Group()
@@ -273,18 +277,23 @@ function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCac
     plaquePlane.position.set(PLAQUE_OFFSET_X, ARTWORK_Y, wallZ)
     group.add(plaquePlane)
 
-    // Raking light so the carved normal/displacement maps actually shade.
-    // Requested direction: plaque left of the artwork -> lit from upper-right
-    // to lower-left; plaque right of the artwork -> lit from upper-left to
-    // lower-right. That's the light sitting at the plaque's own upper-right
-    // or upper-left corner, so only its local x flips with the side.
-    const plaqueLight = new THREE.PointLight(0xfff2d9, 1.4, 1.2, 2)
-    plaqueLight.position.set(-PLAQUE_LIGHT_OFFSET_X, PLAQUE_HEIGHT * 0.6, 0.35)
-    plaquePlane.add(plaqueLight)
 
-    // Every shader's material + plaque textures are precomputed once in
-    // shaderCache, so cycling which shader an artwork shows on a lap is just
-    // swapping references, not redrawing canvases or recompiling shaders.
+    const plaqueLight = new THREE.SpotLight(0xfff2d9, 6, 1.8, Math.PI / 3.2, 0.5, 1.5)
+    const plaqueLightTarget = new THREE.Object3D()
+    plaquePlane.add(plaqueLight)
+    plaquePlane.add(plaqueLightTarget)
+    plaqueLight.target = plaqueLightTarget
+
+    const spotOffset = computeSpotOffset(spotTiltDeg ?? DEFAULT_SPOT_TILT_DEG)
+
+    function applyLightDirection(onLeft) {
+        const sign = onLeft ? 1 : -1
+        plaqueLight.position.set(sign * spotOffset.x, spotOffset.y, SPOT_Z_OFFSET)
+        plaqueLightTarget.position.set(-sign * spotOffset.x, -spotOffset.y, 0)
+    }
+    applyLightDirection(false)
+
+
     function setShader(index) {
         const entry = shaderCache[index]
         plane.material = entry.material
@@ -299,7 +308,7 @@ function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCac
     function setDescriptionSide(direction) {
         const onLeft = direction === 'cw'
         plaquePlane.position.x = onLeft ? -PLAQUE_OFFSET_X : PLAQUE_OFFSET_X
-        plaqueLight.position.x = onLeft ? PLAQUE_LIGHT_OFFSET_X : -PLAQUE_LIGHT_OFFSET_X
+        applyLightDirection(onLeft)
     }
 
     return {
@@ -321,7 +330,8 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         floorColor = FLOOR_COLOR,
         artworkWallOffset = ARTWORK_WALL_OFFSET,
         plaqueSegments = DEFAULT_PLAQUE_SEGMENTS,
-        carveDepth
+        carveDepth,
+        plaqueLightTiltDeg = DEFAULT_SPOT_TILT_DEG
     } = colors
     const shaderCount = shaders.length
     const sampleColor = createColorSampler(renderer)
@@ -494,7 +504,7 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     const artworks = []
     artworkSlots.forEach(({ cell, baseOrder, cellIndex }) => {
         const { x, z, normal } = outerWallInfo(cell, N, Ro)
-        const artwork = buildArtwork(scene, x, z, normal, artworkWallOffset, plaqueSegments, shaderCache)
+        const artwork = buildArtwork(scene, x, z, normal, artworkWallOffset, plaqueSegments, shaderCache, plaqueLightTiltDeg)
         artwork.baseOrder = baseOrder
         artwork.currentIndex = null
         artwork.cellIndex = cellIndex
@@ -560,13 +570,15 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     }
     if (shaderCount > 0) applyShift(0)
 
-    ringCells.forEach((cell) => {
-        if (cell.isLight) {
+    const artworkCellIndices = new Set(artworkSlots.map((slot) => slot.cellIndex))
+
+    ringCells.forEach((cell, index) => {
+        if (cell.isLight && !artworkCellIndices.has(index)) {
             const tile = createLightFloorTile(CELL_SIZE, holeSize, floorColor)
             tile.position.set(cell.x, 0, cell.z)
             scene.add(tile)
 
-            const well = createLightWell(holeSize, SHAFT_DEPTH, cell.isCorner)
+            const well = createLightWell(holeSize, SHAFT_DEPTH)
             well.position.set(cell.x, 0, cell.z)
             scene.add(well)
 

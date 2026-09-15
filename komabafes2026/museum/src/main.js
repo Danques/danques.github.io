@@ -16,7 +16,8 @@ const MUSEUM_COLORS = {
     floorColor: 0x8f8b81,
     artworkWallOffset: 0.2,
     plaqueSegments: 250,
-    carveDepth: 0.015
+    carveDepth: 0.015,
+    plaqueLightTiltDeg: 0
 }
 
 const canvas = document.getElementById('scene')
