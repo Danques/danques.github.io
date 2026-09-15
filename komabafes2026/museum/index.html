@@ -2,12 +2,16 @@
 <html lang="ja">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>Danques的空間</title>
-  <link rel="stylesheet" href="./src/style.css" />
-  <script type="importmap">
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Danques的空間</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@600&family=Noto+Sans+JP:wght@600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="importmap">
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"
@@ -17,25 +21,29 @@
 </head>
 
 <body>
-  <canvas id="scene"></canvas>
+    <canvas id="scene"></canvas>
 
-  <div id="crosshair"></div>
+    <div id="crosshair"></div>
 
-  <div id="joystick-base">
-    <div id="joystick-knob"></div>
-  </div>
-
-  <div id="overlay">
-    <div id="overlay-box">
-      <h1>Danques的空間</h1>
-      <p id="overlay-desc-desktop">WASD or 矢印キーで移動、マウスで視点を操作</p>
-      <p id="overlay-desc-touch">画面左側をドラッグで移動、画面右側をドラッグで視点を操作</p>
-      <p id="overlay-message"></p>
-      <p id="overlay-start">はじめる</p>
+    <div id="joystick-base">
+        <div id="joystick-knob"></div>
     </div>
-  </div>
 
-  <script type="module" src="./src/main.js"></script>
+    <div id="overlay">
+        <div id="overlay-box">
+            <h1>Danques的空間</h1>
+            <p id="overlay-desc-desktop">WASD / 矢印キーで移動、マウスで視点を操作、Shiftで走る</p>
+            <p id="overlay-desc-touch">画面左側をドラッグで移動、画面右側をドラッグで視点を操作</p>
+            <p id="overlay-message"></p>
+            <br>
+            <p id="overlay-sound-warning">音がなります</p>
+            <div id="overlay-sound-choices">
+                <button id="overlay-start" class="overlay-sound-btn" type="button"><span>Play</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
 </body>
 
 </html>

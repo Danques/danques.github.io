@@ -9,9 +9,10 @@ uniform float u_time;
 const float PI = 3.14159265358;
 const float PHI = 1.61803398875;
 
-const int NUM_LINES = 500;
+const int NUM_LINES = 400;
 const int NUM_VERTS = 12;
 const float REJECT_DIST = 0.03;
+const float LINE_THRESHOLD = 0.005;
 
 float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -82,6 +83,7 @@ float distfunc(vec2 p, vec2 icoPts[NUM_VERTS]){
         if(ok){
             float dp = abs(a * p.x + b * p.y + c) * invLen;
             d = min(d, dp);
+            if(d < LINE_THRESHOLD) break;
         }
     }
     return d;
@@ -94,5 +96,5 @@ void main() {
     getIcosahedronPoints(icoPts);
 
     float d = distfunc(p, icoPts);
-    gl_FragColor = vec4(1.0 - vec3(step(0.005 / d, 1.0)), 1.0);
+    gl_FragColor = vec4(1.0 - vec3(step(LINE_THRESHOLD / d, 1.0)), 1.0);
 }

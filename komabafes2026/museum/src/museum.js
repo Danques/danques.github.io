@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import { createArtworkMaterial } from './shaders.js'
-import { createTextTexture, createDynamicTextTexture } from './textPanel.js'
+import { createTextTexture, createDynamicTextTexture, createPlaqueMaps, applyAnisotropy } from './textPanel.js'
 import { createArtworkGlow, createColorSampler } from './glow.js'
+import { getShaderDescription } from './shaderDescriptions.js'
 
 function mod(n, m) {
     return ((n % m) + m) % m
@@ -21,6 +22,12 @@ const HOLE_RATIO = 0.1
 const SHAFT_DEPTH = 1.6
 const TEXT_HEIGHT = 2.0
 const ARTWORK_WALL_OFFSET = 0.2
+const PLAQUE_WIDTH = 1.2
+const PLAQUE_HEIGHT = 0.85
+const PLAQUE_MARGIN = 0.15
+const PLAQUE_OFFSET_X = PLANE_SIZE / 2 + PLAQUE_WIDTH / 2 + PLAQUE_MARGIN
+const PLAQUE_LIGHT_OFFSET_X = 0.12
+const DEFAULT_PLAQUE_SEGMENTS = 240
 
 const CORRIDOR_N = 9
 
@@ -37,6 +44,15 @@ const WALL_COLOR = 0xa8a49b
 const INNER_WALL_COLOR = 0xa8a49b
 const CEILING_COLOR = 0x000000
 const FLOOR_COLOR = 0xa8a49b
+
+const LAP_MESSAGES = {
+    '-5': '',
+    '-2': '',
+    '-1': '',
+    '0': '← 順路 →',
+    1: '',
+    5: ''
+}
 
 function buildRingCells(N, cellSize) {
     const half = (N - 1) / 2
@@ -201,8 +217,9 @@ function setWellVisible(well, visible) {
     }
 }
 
-function addTextPlane(group, text, options, desiredHeight, maxWidth, y, z) {
+function addTextPlane(group, text, options, desiredHeight, maxWidth, y, z, renderer) {
     const { texture, aspect } = createTextTexture(text, options)
+    applyAnisotropy(texture, renderer)
     let width = desiredHeight * aspect
     let height = desiredHeight
     if (maxWidth && width > maxWidth) {
@@ -218,7 +235,7 @@ function addTextPlane(group, text, options, desiredHeight, maxWidth, y, z) {
     return plane
 }
 
-function buildArtwork(scene, x, z, normal, wallOffset) {
+function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCache) {
     const rotationY = Math.atan2(normal.x, normal.z)
 
     const group = new THREE.Group()
@@ -226,11 +243,8 @@ function buildArtwork(scene, x, z, normal, wallOffset) {
     group.rotation.y = rotationY
     scene.add(group)
 
-    const material = createArtworkMaterial(
-        'precision mediump float;\nvoid main() { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }',
-        new THREE.Vector2(1024, 1024)
-    )
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE), material)
+    const initialEntry = shaderCache[0]
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE), initialEntry.material)
     plane.position.set(0, ARTWORK_Y, 0)
     group.add(plane)
 
@@ -239,27 +253,64 @@ function buildArtwork(scene, x, z, normal, wallOffset) {
     group.add(glowGroup)
     const glow = createArtworkGlow(glowGroup, PLANE_SIZE)
 
-    const labelText = createDynamicTextTexture({
-        fontSize: 48,
-        color: '#111111',
-        background: 'rgba(255,255,255,0.85)',
-        width: 640,
-        height: 96
-    })
-    const labelPlane = new THREE.Mesh(
-        new THREE.PlaneGeometry(PLANE_SIZE, 0.32),
-        new THREE.MeshBasicMaterial({ map: labelText.texture, transparent: true })
-    )
-    labelPlane.position.set(0, ARTWORK_Y - PLANE_SIZE / 2 - 0.26, 0)
-    group.add(labelPlane)
+    const wallZ = -wallOffset + 0.01
 
-    function setShader(shader) {
-        material.fragmentShader = shader.source
-        material.needsUpdate = true
-        labelText.draw(shader.name.replace(/\.frag$/i, '').replace(/[-_]/g, ' '))
+    const segmentsX = plaqueSegments || DEFAULT_PLAQUE_SEGMENTS
+    const segmentsY = Math.max(1, Math.round(segmentsX * (PLAQUE_HEIGHT / PLAQUE_WIDTH)))
+    const plaquePlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(PLAQUE_WIDTH, PLAQUE_HEIGHT, segmentsX, segmentsY),
+        new THREE.MeshStandardMaterial({
+            map: initialEntry.maps.colorTexture,
+            normalMap: initialEntry.maps.normalTexture,
+            displacementMap: initialEntry.maps.heightTexture,
+            displacementScale: initialEntry.maps.displacementScale,
+            displacementBias: initialEntry.maps.displacementBias,
+            transparent: true,
+            roughness: 0.9,
+            metalness: 0
+        })
+    )
+    plaquePlane.position.set(PLAQUE_OFFSET_X, ARTWORK_Y, wallZ)
+    group.add(plaquePlane)
+
+    // Raking light so the carved normal/displacement maps actually shade.
+    // Requested direction: plaque left of the artwork -> lit from upper-right
+    // to lower-left; plaque right of the artwork -> lit from upper-left to
+    // lower-right. That's the light sitting at the plaque's own upper-right
+    // or upper-left corner, so only its local x flips with the side.
+    const plaqueLight = new THREE.PointLight(0xfff2d9, 1.4, 1.2, 2)
+    plaqueLight.position.set(-PLAQUE_LIGHT_OFFSET_X, PLAQUE_HEIGHT * 0.6, 0.35)
+    plaquePlane.add(plaqueLight)
+
+    // Every shader's material + plaque textures are precomputed once in
+    // shaderCache, so cycling which shader an artwork shows on a lap is just
+    // swapping references, not redrawing canvases or recompiling shaders.
+    function setShader(index) {
+        const entry = shaderCache[index]
+        plane.material = entry.material
+        const mat = plaquePlane.material
+        mat.map = entry.maps.colorTexture
+        mat.normalMap = entry.maps.normalTexture
+        mat.displacementMap = entry.maps.heightTexture
+        mat.displacementScale = entry.maps.displacementScale
+        mat.displacementBias = entry.maps.displacementBias
     }
 
-    return { material, setShader, glow }
+    function setDescriptionSide(direction) {
+        const onLeft = direction === 'cw'
+        plaquePlane.position.x = onLeft ? -PLAQUE_OFFSET_X : PLAQUE_OFFSET_X
+        plaqueLight.position.x = onLeft ? PLAQUE_LIGHT_OFFSET_X : -PLAQUE_LIGHT_OFFSET_X
+    }
+
+    return {
+        plane,
+        setShader,
+        setDescriptionSide,
+        glow,
+        worldX: group.position.x,
+        worldZ: group.position.z,
+        descSide: null
+    }
 }
 
 export function buildMuseum(scene, shaders, renderer, colors = {}) {
@@ -268,7 +319,9 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         innerWallColor = INNER_WALL_COLOR,
         ceilingColor = CEILING_COLOR,
         floorColor = FLOOR_COLOR,
-        artworkWallOffset = ARTWORK_WALL_OFFSET
+        artworkWallOffset = ARTWORK_WALL_OFFSET,
+        plaqueSegments = DEFAULT_PLAQUE_SEGMENTS,
+        carveDepth
     } = colors
     const shaderCount = shaders.length
     const sampleColor = createColorSampler(renderer)
@@ -311,7 +364,8 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         1.3,
         Ri * 1.5,
         TEXT_HEIGHT,
-        0.03
+        0.03,
+        renderer
     )
     const lapText = createDynamicTextTexture({
         fontSize: 90,
@@ -320,6 +374,7 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         width: 512,
         height: 160
     })
+    applyAnisotropy(lapText.texture, renderer)
     const lapPlane = new THREE.Mesh(
         new THREE.PlaneGeometry(1.6, 0.5),
         new THREE.MeshBasicMaterial({ map: lapText.texture, transparent: true })
@@ -328,12 +383,6 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
     titleGroup.add(lapPlane)
     titleGroup.position.set(0, 0, Ri)
     scene.add(titleGroup)
-
-    const LAP_MESSAGES = {
-        '-5': 'そろそろ飽きましたか？',
-        1: 'Hello',
-        5: 'そろそろ飽きましたか？',
-    }
     const messageText = createDynamicTextTexture({
         fontSize: 64,
         color: '#111111',
@@ -341,6 +390,7 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         width: 1400,
         height: 240
     })
+    applyAnisotropy(messageText.texture, renderer)
     const messageGroup = new THREE.Group()
     const messagePlane = new THREE.Mesh(
         new THREE.PlaneGeometry(4, 4 / messageText.aspect),
@@ -354,6 +404,22 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
 
     const ringCells = buildRingCells(N, CELL_SIZE)
     const half = (N - 1) / 2
+
+    function nearestCellIndex(x, z) {
+        let bestIndex = 0
+        let bestDistSq = Infinity
+        for (let i = 0; i < ringCells.length; i++) {
+            const cell = ringCells[i]
+            const dx = x - cell.x
+            const dz = z - cell.z
+            const distSq = dx * dx + dz * dz
+            if (distSq < bestDistSq) {
+                bestDistSq = distSq
+                bestIndex = i
+            }
+        }
+        return bestIndex
+    }
 
     const trapCell = ringCells.find((cell) => cell.isLight && cell.col === half && cell.row === N - 1)
     const darkPlaneY = -PIT_LANDING_DEPTH
@@ -406,20 +472,86 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         let baseOrder = 0
         ccwFromSpawn.forEach((cell) => {
             if (isArtworkEligible(cell)) {
-                artworkSlots.push({ cell, baseOrder })
+                artworkSlots.push({ cell, baseOrder, cellIndex: ringCells.indexOf(cell) })
                 baseOrder += 1
             }
         })
     }
     const slotCount = artworkSlots.length
 
+    // Precompute each distinct shader's material and plaque textures once.
+    // Artworks then just swap references when their assigned shader changes
+    // on a lap, instead of redrawing the plaque canvas and recompiling the
+    // shader every time (which used to cause a stutter each time you passed
+    // the title, since that's where a lap completes and shifts land).
+    const shaderCache = shaderCount > 0
+        ? shaders.map((shader) => {
+              const material = createArtworkMaterial(shader.source, new THREE.Vector2(1024, 1024))
+              const maps = createPlaqueMaps({ carveDepth })
+              applyAnisotropy(maps.colorTexture, renderer)
+              applyAnisotropy(maps.normalTexture, renderer)
+              const title = shader.name.replace(/\.frag$/i, '').replace(/[-_]/g, ' ')
+              maps.draw(title, getShaderDescription(shader.name))
+              return { material, maps }
+          })
+        : []
+
     const artworks = []
-    artworkSlots.forEach(({ cell, baseOrder }) => {
+    artworkSlots.forEach(({ cell, baseOrder, cellIndex }) => {
         const { x, z, normal } = outerWallInfo(cell, N, Ro)
-        const artwork = buildArtwork(scene, x, z, normal, artworkWallOffset)
+        const artwork = buildArtwork(scene, x, z, normal, artworkWallOffset, plaqueSegments, shaderCache)
         artwork.baseOrder = baseOrder
         artwork.currentIndex = null
+        artwork.cellIndex = cellIndex
         artworks.push(artwork)
+    })
+
+    const cornerIndices = []
+    ringCells.forEach((cell, idx) => {
+        if (cell.isCorner) cornerIndices.push(idx)
+    })
+
+    function nearestCornerBackward(cellIndex) {
+        let best = cornerIndices[0]
+        let bestDist = Infinity
+        cornerIndices.forEach((c) => {
+            const dist = mod(cellIndex - c, total)
+            if (dist < bestDist) {
+                bestDist = dist
+                best = c
+            }
+        })
+        return best
+    }
+
+    function nearestCornerForward(cellIndex) {
+        let best = cornerIndices[0]
+        let bestDist = Infinity
+        cornerIndices.forEach((c) => {
+            const dist = mod(c - cellIndex, total)
+            if (dist < bestDist) {
+                bestDist = dist
+                best = c
+            }
+        })
+        return best
+    }
+
+    const artworksByCorners = new Map()
+    artworks.forEach((artwork) => {
+        const prevCorner = nearestCornerBackward(artwork.cellIndex)
+        const nextCorner = nearestCornerForward(artwork.cellIndex)
+        const key = prevCorner + '-' + nextCorner
+        if (!artworksByCorners.has(key)) artworksByCorners.set(key, { prevCorner, nextCorner, artworks: [] })
+        artworksByCorners.get(key).artworks.push(artwork)
+    })
+
+    const sensorMap = new Map()
+    artworksByCorners.forEach(({ prevCorner, nextCorner, artworks: artworkList }) => {
+        const leftSensor = mod(prevCorner - 1, total)
+        const rightSensor = mod(nextCorner + 1, total)
+        sensorMap.set(leftSensor, { artworks: artworkList, side: 'cw' })
+        sensorMap.set(rightSensor, { artworks: artworkList, side: 'ccw' })
     })
 
     function applyShift(shift) {
@@ -427,7 +559,7 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
             const index = mod(artwork.baseOrder + shift * slotCount, shaderCount)
             if (index !== artwork.currentIndex) {
                 artwork.currentIndex = index
-                artwork.setShader(shaders[index])
+                artwork.setShader(index)
             }
         })
     }
@@ -478,9 +610,13 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         artworkShift: 0,
         lapCount: 0,
         lastDisplay: '0',
-        lastMessage: ''
+        lastMessage: LAP_MESSAGES[0] || ''
     }
     lapText.draw(lapState.lastDisplay)
+    messageText.draw(lapState.lastMessage)
+
+    const initialCellIndex = nearestCellIndex(spawnPosition.x, spawnPosition.z)
+    const cellState = { current: initialCellIndex, previous: initialCellIndex }
 
     const pitState = {
         armed: false,
@@ -535,6 +671,22 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         lapState.unwrapped += delta
         lapState.lastAngle = angle
 
+        const newCellIndex = nearestCellIndex(x, z)
+        if (newCellIndex !== cellState.current) {
+            cellState.previous = cellState.current
+            cellState.current = newCellIndex
+
+            const sensor = sensorMap.get(newCellIndex)
+            if (sensor) {
+                sensor.artworks.forEach((artwork) => {
+                    if (artwork.descSide !== sensor.side) {
+                        artwork.descSide = sensor.side
+                        artwork.setDescriptionSide(sensor.side)
+                    }
+                })
+            }
+        }
+
         const artworkShift = Math.floor(lapState.unwrapped / (Math.PI * 2))
         if (artworkShift !== lapState.artworkShift) {
             lapState.artworkShift = artworkShift
@@ -573,17 +725,19 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
             artworkShift: lapState.artworkShift,
             lapCount: lapState.lapCount,
             lastDisplay: lapState.lastDisplay,
-            slots: artworks.map((a) => ({ baseOrder: a.baseOrder, currentIndex: a.currentIndex }))
+            cell: cellState.current,
+            prevCell: cellState.previous,
+            slots: artworks.map((a) => ({ baseOrder: a.baseOrder, currentIndex: a.currentIndex, cellIndex: a.cellIndex, descSide: a.descSide }))
         }),
         updateTime(elapsed, dt) {
-            artworks.forEach((artwork) => {
-                artwork.material.uniforms.u_time.value = elapsed
+            shaderCache.forEach(({ material }) => {
+                material.uniforms.u_time.value = elapsed
             })
 
             if (artworks.length > 0) {
                 sampleCursor = (sampleCursor + 1) % artworks.length
                 const artwork = artworks[sampleCursor]
-                sampleColor(artwork.material, sampledColor)
+                sampleColor(artwork.plane.material, sampledColor)
                 artwork.glow.applyColor(sampledColor)
             }
 
