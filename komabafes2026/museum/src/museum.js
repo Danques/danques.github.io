@@ -3,6 +3,9 @@ import { createArtworkMaterial } from './shaders.js'
 import { createTextTexture, createDynamicTextTexture, createPlaqueMaps, applyAnisotropy } from './textPanel.js'
 import { createArtworkGlow, createColorSampler } from './glow.js'
 import { getShaderDescription } from './shaderDescriptions.js'
+import { createReactionDiffusion } from './reactionDiffusion.js'
+
+const REACTION_DIFFUSION_SHADER = '05-Gray-Scott.frag'
 
 function mod(n, m) {
     return ((n % m) + m) % m
@@ -502,6 +505,19 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         })
         : []
 
+    let reactionDiffusion = null
+    const rdIndex = shaders.findIndex((shader) => shader.name === REACTION_DIFFUSION_SHADER)
+    const rdEntry = rdIndex >= 0 ? shaderCache[rdIndex] : null
+    if (rdEntry) {
+        const placeholder = new THREE.DataTexture(new Uint8Array([120, 126, 174, 255]), 1, 1)
+        placeholder.needsUpdate = true
+        rdEntry.material.uniforms.u_state = { value: placeholder }
+        createReactionDiffusion(renderer).then((rd) => {
+            reactionDiffusion = rd
+            rdEntry.material.uniforms.u_state.value = rd.getTexture()
+        })
+    }
+
     const artworks = []
     artworkSlots.forEach(({ cell, baseOrder, cellIndex }) => {
         const { x, z, normal } = outerWallInfo(cell, N, Ro)
@@ -738,6 +754,11 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
             slots: artworks.map((a) => ({ baseOrder: a.baseOrder, currentIndex: a.currentIndex, cellIndex: a.cellIndex, descSide: a.descSide }))
         }),
         updateTime(elapsed, dt) {
+            if (reactionDiffusion && rdEntry) {
+                reactionDiffusion.step(dt)
+                rdEntry.material.uniforms.u_state.value = reactionDiffusion.getTexture()
+            }
+
             shaderCache.forEach(({ material }) => {
                 material.uniforms.u_time.value = elapsed
             })
