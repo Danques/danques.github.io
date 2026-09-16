@@ -31,8 +31,8 @@ async function loadShader(path) {
 
 export async function createReactionDiffusion(renderer) {
     const [stepSource, initSource] = await Promise.all([
-        loadShader('./GLSL/_Gray-Scott-step.frag'),
-        loadShader('./GLSL/_Gray-Scott-init.frag')
+        loadShader('./GLSL/Gray-Scott-step.frag'),
+        loadShader('./GLSL/Gray-Scott-init.frag')
     ])
 
     const scene = new THREE.Scene()
