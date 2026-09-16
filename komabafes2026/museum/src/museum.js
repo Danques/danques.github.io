@@ -4,8 +4,13 @@ import { createTextTexture, createDynamicTextTexture, createPlaqueMaps, applyAni
 import { createArtworkGlow, createColorSampler } from './glow.js'
 import { getShaderDescription } from './shaderDescriptions.js'
 import { createReactionDiffusion } from './reactionDiffusion.js'
+import { createIcosahedronLines } from './icosahedronLines.js'
+import { createSolidTexture } from './offscreenRender.js'
 
-const REACTION_DIFFUSION_SHADER = '05-Gray-Scott.frag'
+const DYNAMIC_TEXTURE_SHADERS = [
+    { shaderName: '05-Gray-Scott.frag', create: createReactionDiffusion, placeholderColor: [120, 126, 174, 255] },
+    { shaderName: '04-lines.frag', create: createIcosahedronLines, placeholderColor: [0, 0, 0, 255] }
+]
 
 function mod(n, m) {
     return ((n % m) + m) % m
@@ -25,6 +30,7 @@ const HOLE_RATIO = 0.1
 const SHAFT_DEPTH = 1.6
 const TEXT_HEIGHT = 2.0
 const ARTWORK_WALL_OFFSET = 0.2
+const PLAQUE_WALL_GAP = 0.05
 const PLAQUE_WIDTH = 1.2
 const PLAQUE_HEIGHT = 0.85
 const PLAQUE_MARGIN = 0.15
@@ -261,7 +267,7 @@ function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCac
     group.add(glowGroup)
     const glow = createArtworkGlow(glowGroup, PLANE_SIZE)
 
-    const wallZ = -wallOffset + 0.01
+    const wallZ = -wallOffset + PLAQUE_WALL_GAP
 
     const segmentsX = plaqueSegments || DEFAULT_PLAQUE_SEGMENTS
     const segmentsY = Math.max(1, Math.round(segmentsX * (PLAQUE_HEIGHT / PLAQUE_WIDTH)))
@@ -275,7 +281,10 @@ function buildArtwork(scene, x, z, normal, wallOffset, plaqueSegments, shaderCac
             displacementBias: initialEntry.maps.displacementBias,
             transparent: true,
             roughness: 0.9,
-            metalness: 0
+            metalness: 0,
+            polygonOffset: true,
+            polygonOffsetFactor: -4,
+            polygonOffsetUnits: -4
         })
     )
     plaquePlane.position.set(PLAQUE_OFFSET_X, ARTWORK_Y, wallZ)
@@ -505,18 +514,17 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
         })
         : []
 
-    let reactionDiffusion = null
-    const rdIndex = shaders.findIndex((shader) => shader.name === REACTION_DIFFUSION_SHADER)
-    const rdEntry = rdIndex >= 0 ? shaderCache[rdIndex] : null
-    if (rdEntry) {
-        const placeholder = new THREE.DataTexture(new Uint8Array([120, 126, 174, 255]), 1, 1)
-        placeholder.needsUpdate = true
-        rdEntry.material.uniforms.u_state = { value: placeholder }
-        createReactionDiffusion(renderer).then((rd) => {
-            reactionDiffusion = rd
-            rdEntry.material.uniforms.u_state.value = rd.getTexture()
+    const dynamicTextures = []
+    DYNAMIC_TEXTURE_SHADERS.forEach(({ shaderName, create, placeholderColor }) => {
+        const index = shaders.findIndex((shader) => shader.name === shaderName)
+        const entry = index >= 0 ? shaderCache[index] : null
+        if (!entry) return
+        entry.material.uniforms.u_state = { value: createSolidTexture(...placeholderColor) }
+        Promise.resolve(create(renderer)).then((dynamicTexture) => {
+            entry.material.uniforms.u_state.value = dynamicTexture.getTexture()
+            dynamicTextures.push({ entry, dynamicTexture })
         })
-    }
+    })
 
     const artworks = []
     artworkSlots.forEach(({ cell, baseOrder, cellIndex }) => {
@@ -754,10 +762,10 @@ export function buildMuseum(scene, shaders, renderer, colors = {}) {
             slots: artworks.map((a) => ({ baseOrder: a.baseOrder, currentIndex: a.currentIndex, cellIndex: a.cellIndex, descSide: a.descSide }))
         }),
         updateTime(elapsed, dt) {
-            if (reactionDiffusion && rdEntry) {
-                reactionDiffusion.step(dt)
-                rdEntry.material.uniforms.u_state.value = reactionDiffusion.getTexture()
-            }
+            dynamicTextures.forEach(({ entry, dynamicTexture }) => {
+                dynamicTexture.update(elapsed, dt)
+                entry.material.uniforms.u_state.value = dynamicTexture.getTexture()
+            })
 
             shaderCache.forEach(({ material }) => {
                 material.uniforms.u_time.value = elapsed

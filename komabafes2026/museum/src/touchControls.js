@@ -1,5 +1,6 @@
+import { applyLook } from './lookControls.js'
+
 const LOOK_SENSITIVITY = 0.0032
-const MAX_PITCH = Math.PI / 2 - 0.05
 const BASE_RADIUS = 45
 
 export function createTouchControls(player, joystickBase, joystickKnob) {
@@ -41,9 +42,7 @@ export function createTouchControls(player, joystickBase, joystickKnob) {
             const dx = e.clientX - lastLook.x
             const dy = e.clientY - lastLook.y
             lastLook = { x: e.clientX, y: e.clientY }
-            player.yaw -= dx * LOOK_SENSITIVITY
-            player.pitch -= dy * LOOK_SENSITIVITY
-            player.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, player.pitch))
+            applyLook(player, dx, dy, LOOK_SENSITIVITY)
         }
     })
 

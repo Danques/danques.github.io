@@ -1,3 +1,8 @@
+export async function fetchText(path) {
+  const res = await fetch(path, { cache: 'no-store' })
+  return res.text()
+}
+
 export async function loadFragmentShaders() {
   const fromManifest = await tryManifest()
   if (fromManifest) return fromManifest
@@ -41,10 +46,6 @@ async function tryDirectoryListing() {
 async function fetchAll(names) {
   const sorted = [...names].sort()
   return Promise.all(
-    sorted.map(async (name) => {
-      const res = await fetch(`./GLSL/${name}`, { cache: 'no-store' })
-      const source = await res.text()
-      return { name, source }
-    })
+    sorted.map(async (name) => ({ name, source: await fetchText(`./GLSL/${name}`) }))
   )
 }

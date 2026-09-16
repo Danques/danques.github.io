@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 
 const TEXT_SUPERSAMPLE = 2
+const DEFAULT_FONT_FAMILY = "'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif"
 
 export function applyAnisotropy(texture, renderer) {
     if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
@@ -13,7 +14,7 @@ export function createTextTexture(text, options = {}) {
         fontSize = 64,
         color = '#111111',
         background = 'rgba(255,255,255,0)',
-        fontFamily = "'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif"
+        fontFamily = DEFAULT_FONT_FAMILY
     } = options
 
     const px = fontSize * TEXT_SUPERSAMPLE
@@ -79,7 +80,7 @@ export function createPlaqueMaps(options = {}) {
         height = 460,
         titleFontSize = 50,
         descFontSize = 34,
-        fontFamily = "'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif",
+        fontFamily = DEFAULT_FONT_FAMILY,
         inkColor = '#2b271f',
         bevel = 5,
         normalStrength = 5,
@@ -177,7 +178,7 @@ export function createDynamicTextTexture(options = {}) {
         fontSize = 64,
         color = '#111111',
         background = 'rgba(255,255,255,0)',
-        fontFamily = "'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif",
+        fontFamily = DEFAULT_FONT_FAMILY,
         width = 512,
         height = 160,
         lineHeight = fontSize * 1.25

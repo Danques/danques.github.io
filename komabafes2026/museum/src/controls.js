@@ -1,5 +1,6 @@
+import { applyLook } from './lookControls.js'
+
 const LOOK_SENSITIVITY = 0.0022
-const MAX_PITCH = Math.PI / 2 - 0.05
 
 export function createDesktopControls(domElement, player) {
     const keys = new Set()
@@ -20,9 +21,7 @@ export function createDesktopControls(domElement, player) {
 
     window.addEventListener('mousemove', (e) => {
         if (!pointerLocked) return
-        player.yaw -= e.movementX * LOOK_SENSITIVITY
-        player.pitch -= e.movementY * LOOK_SENSITIVITY
-        player.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, player.pitch))
+        applyLook(player, e.movementX, e.movementY, LOOK_SENSITIVITY)
     })
 
     return {

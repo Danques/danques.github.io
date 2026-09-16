@@ -1,4 +1,7 @@
 import * as THREE from 'three'
+import { createRenderTarget, renderToTarget } from './offscreenRender.js'
+import { FULLSCREEN_VERTEX_SHADER } from './shaders.js'
+import { fetchText } from './shaderLoader.js'
 
 const SIM_SIZE = 256
 const STEPS_PER_FRAME = 10
@@ -16,23 +19,10 @@ const KILL_BASE = 0.05
 
 const NOISE_AMOUNT = 0.006
 
-const VERTEX_SHADER = `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
-}
-`
-
-async function loadShader(path) {
-    const res = await fetch(path, { cache: 'no-store' })
-    return res.text()
-}
-
 export async function createReactionDiffusion(renderer) {
     const [stepSource, initSource] = await Promise.all([
-        loadShader('./GLSL/Gray-Scott-step.frag'),
-        loadShader('./GLSL/Gray-Scott-init.frag')
+        fetchText('./GLSL/Gray-Scott-step.frag'),
+        fetchText('./GLSL/Gray-Scott-init.frag')
     ])
 
     const scene = new THREE.Scene()
@@ -41,14 +31,12 @@ export async function createReactionDiffusion(renderer) {
     scene.add(quad)
 
     function makeTarget() {
-        return new THREE.WebGLRenderTarget(SIM_SIZE, SIM_SIZE, {
+        return createRenderTarget(SIM_SIZE, SIM_SIZE, {
             type: THREE.HalfFloatType,
             wrapS: THREE.RepeatWrapping,
             wrapT: THREE.RepeatWrapping,
             minFilter: THREE.LinearFilter,
-            magFilter: THREE.LinearFilter,
-            depthBuffer: false,
-            stencilBuffer: false
+            magFilter: THREE.LinearFilter
         })
     }
 
@@ -56,7 +44,7 @@ export async function createReactionDiffusion(renderer) {
     let targetB = makeTarget()
 
     const stepMaterial = new THREE.ShaderMaterial({
-        vertexShader: VERTEX_SHADER,
+        vertexShader: FULLSCREEN_VERTEX_SHADER,
         fragmentShader: stepSource,
         depthTest: false,
         depthWrite: false,
@@ -74,7 +62,7 @@ export async function createReactionDiffusion(renderer) {
     })
 
     const initMaterial = new THREE.ShaderMaterial({
-        vertexShader: VERTEX_SHADER,
+        vertexShader: FULLSCREEN_VERTEX_SHADER,
         fragmentShader: initSource,
         depthTest: false,
         depthWrite: false
@@ -82,16 +70,13 @@ export async function createReactionDiffusion(renderer) {
 
     function renderTo(material, target) {
         quad.material = material
-        renderer.setRenderTarget(target)
-        renderer.render(scene, camera)
-        renderer.setRenderTarget(null)
+        renderToTarget(renderer, scene, camera, target)
     }
 
     renderTo(initMaterial, targetA)
     renderTo(initMaterial, targetB)
 
     let stepCount = 0
-    let elapsed = 0
 
     function swapTargets() {
         const tmp = targetA
@@ -99,8 +84,7 @@ export async function createReactionDiffusion(renderer) {
         targetB = tmp
     }
 
-    function step(dt) {
-        elapsed += dt
+    function update(elapsed) {
         const progress = (elapsed / FEED_PULSE_PERIOD_SECONDS) % 1;
         const triangle = Math.abs(progress - 0.5) * 4 - 1;
         stepMaterial.uniforms.u_feed.value = FEED_CENTER + FEED_AMPLITUDE * triangle;
@@ -126,5 +110,5 @@ export async function createReactionDiffusion(renderer) {
         quad.geometry.dispose()
     }
 
-    return { step, getTexture, dispose }
+    return { update, getTexture, dispose }
 }

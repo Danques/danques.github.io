@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { createOrthoScene, createRenderTarget, renderToTarget } from './offscreenRender.js'
 
 const SAMPLE_SIZE = 8
 
@@ -27,21 +28,16 @@ function getGlowTexture() {
 
 
 export function createColorSampler(renderer) {
-    const target = new THREE.WebGLRenderTarget(SAMPLE_SIZE, SAMPLE_SIZE)
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-    camera.position.z = 1
-    const scene = new THREE.Scene()
+    const target = createRenderTarget(SAMPLE_SIZE, SAMPLE_SIZE)
+    const { scene, camera } = createOrthoScene()
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2))
     scene.add(mesh)
     const buffer = new Uint8Array(SAMPLE_SIZE * SAMPLE_SIZE * 4)
 
     return function sampleColor(material, out) {
         mesh.material = material
-        const previousTarget = renderer.getRenderTarget()
-        renderer.setRenderTarget(target)
-        renderer.render(scene, camera)
+        renderToTarget(renderer, scene, camera, target)
         renderer.readRenderTargetPixels(target, 0, 0, SAMPLE_SIZE, SAMPLE_SIZE, buffer)
-        renderer.setRenderTarget(previousTarget)
 
         let r = 0
         let g = 0
