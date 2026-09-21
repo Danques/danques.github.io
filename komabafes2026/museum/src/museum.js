@@ -20,7 +20,7 @@ function angleOf(x, z) {
     return Math.atan2(-z, x)
 }
 
-const CELL_SIZE = 2.2
+const CELL_SIZE = 3.0
 const WALL_HEIGHT = 100
 const EYE_HEIGHT = 1.6
 const ARTWORK_Y = EYE_HEIGHT
