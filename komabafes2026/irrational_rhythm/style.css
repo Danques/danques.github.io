@@ -1,0 +1,231 @@
+body {
+    font-family: system-ui, sans-serif;
+    margin: 24px;
+    color: #222;
+}
+
+h1 {
+    font-size: 20px;
+}
+
+.global {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.global input[type=number] {
+    width: 70px;
+}
+
+button {
+    font-size: 14px;
+    padding: 6px 16px;
+    cursor: pointer;
+}
+
+#info {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+#ioMsg {
+    font-size: 13px;
+}
+
+.inst {
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    max-width: 1100px;
+}
+
+.inst h2 {
+    font-size: 16px;
+    margin: 0 0 8px;
+}
+
+.ctrl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.ctrl input[type=text] {
+    width: 110px;
+}
+
+.ctrl input[type=number] {
+    width: 64px;
+}
+
+.err {
+    color: #c00;
+    font-size: 13px;
+}
+
+.meta {
+    font-size: 12px;
+    color: #555;
+    margin: 4px 0;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 4px 0 6px;
+    font-size: 11px;
+    color: #444;
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.legend i {
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+
+.barswrap {
+    display: flex;
+}
+
+.lbl {
+    width: 28px;
+    flex: none;
+}
+
+.bars {
+    position: relative;
+    flex: 1;
+    display: flex;
+    height: 96px;
+    border: 1px solid #000;
+    background: #f4f4f4;
+    user-select: none;
+}
+
+.blk {
+    position: relative;
+    box-sizing: border-box;
+    height: 100%;
+    border-right: 1px solid #000;
+    overflow: hidden;
+    cursor: ns-resize;
+    touch-action: none;
+    background: #fff;
+}
+
+.blk:last-child {
+    border-right: none;
+}
+
+.blk .subs {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+}
+
+.blk .sub {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.blk .sub+.sub {
+    border-left: 1px solid rgba(0, 0, 0, .45);
+}
+
+/* the fill covers the whole cell; the bar height is a clip */
+.blk .fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.blk .k {
+    position: absolute;
+    top: 1px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    color: #000;
+    text-shadow: 0 0 2px #fff;
+    pointer-events: none;
+}
+
+.blk .v {
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9px;
+    color: #000;
+    text-shadow: 0 0 2px #fff;
+    pointer-events: none;
+}
+
+.blk .sub.sel {
+    outline: 3px solid #000;
+    outline-offset: -3px;
+    z-index: 1;
+}
+
+.scan {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    background: #000;
+    box-shadow: 0 0 4px rgba(0, 0, 0, .6);
+    pointer-events: none;
+    display: none;
+    z-index: 5;
+}
+
+.edit {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.edit input[type=number] {
+    width: 70px;
+}
+
+.edit input[type=text] {
+    width: 380px;
+    max-width: 90%;
+}
+
+.edit input.dlist {
+    width: 300px;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>無理数拍子ドラムシーケンサー</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js" defer></script>
+</head>
+
+<body>
+    <h1>無理数拍子ドラムシーケンサー</h1>
+
+    <div class="global">
+        <button id="playBtn">▶ 再生</button>
+        <label>全音符 BPM(全楽器共通)
+            <input type="number" id="gbpm" min="1" max="600" step="1" value="30">
+        </label>
+        <label>マスター音量
+            <input type="range" id="mastervol" min="0" max="1.5" step="0.01" value="0.8"
+                style="width:140px;vertical-align:middle">
+            <span id="mastervolv">80%</span>
+        </label>
+        <span id="gmeta" style="font-size:13px;color:#555;"></span>
+    </div>
+
+    <div class="global">
+        <button id="saveBtn">セーブデータを保存 (.txt)</button>
+        <button id="loadBtn">セーブデータを読み込み</button>
+        <input type="file" id="loadFile" accept=".txt,.json,text/plain,application/json" style="display:none">
+        <span id="ioMsg"></span>
+    </div>
+
+    <div id="info">
+        S<sub>i</sub> = S<sub>i-1</sub><sup>c1</sup> … S<sub>i-m</sub><sup>cm</sup> による文字列を深さごとに生成し、
+        各文字 j の長さを α<sup>-(order+j)</sup> として全音符を分割します。<br>
+        音符を上下にドラッグすることで音の強さを設定できます。また、各音符はn分割して個別に強さを設定できます。<br>
+        リズムパターンはテキストファイルとしてセーブ・ロードできます。<br>
+    </div>
+
+    <div id="app"></div>
+
+    <script>
+
+    </script>
+</body>
+
+</html>
